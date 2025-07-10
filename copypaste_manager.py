@@ -1,4 +1,5 @@
 import os
+import sys
 import subprocess
 import tkinter as tk
 from tkinter import ttk, messagebox
@@ -18,7 +19,7 @@ class SystemManager:
     def __init__(self, root: tk.Tk) -> None:
         self.root = root
         self.root.title("System Manager")
-        self.root.geometry("500x550")  # Adjusted for utility section
+        self.root.geometry("500x550")
         
         # Track running processes
         self.processes: Dict[str, Optional[subprocess.Popen]] = {
@@ -30,8 +31,8 @@ class SystemManager:
             'structure': None
         }
 
-        # Define paths
-        self.base_path = os.path.dirname(__file__)
+        # Define paths - Corrected for PyInstaller
+        self.base_path = self._get_base_path()
         self.paths = {
             'individual': os.path.join(self.base_path, 'Individual', 'copypaste_individual_manager.py'),
             'folder': os.path.join(self.base_path, 'Folder', 'FolderCopypaste_interface.py'),
@@ -58,18 +59,27 @@ class SystemManager:
         # Setup periodic process status check
         self.root.after(1000, self._check_process_status)
 
+    def _get_base_path(self) -> str:
+        """Get the correct base path for both development and PyInstaller."""
+        if getattr(sys, 'frozen', False):
+            # Running as PyInstaller executable
+            return sys._MEIPASS
+        else:
+            # Running as Python script
+            return os.path.dirname(__file__)
+
     def _verify_setup(self) -> None:
         """Verify all required files exist and are accessible."""
-        missing_files = [
-            f"{manager} interface: {path}"
-            for manager, path in self.paths.items()
-            if not os.path.exists(path)
-        ]
+        missing_files = []
+        for manager, path in self.paths.items():
+            if not os.path.exists(path):
+                missing_files.append(f"{manager} interface: {path}")
 
         if missing_files:
             error_msg = "Missing required files:\n" + "\n".join(missing_files)
             messagebox.showerror("Setup Error", error_msg)
-            raise SystemExit(1)
+            # Don't exit, just show warning for PyInstaller compatibility
+            print("Warning: Some files are missing but continuing...")
 
     def _create_gui(self) -> None:
         """Create the main GUI layout with improved styling and organization."""
@@ -165,18 +175,32 @@ class SystemManager:
         """Launch a specific manager type with improved process handling."""
         if not self._is_manager_running(manager_type):
             try:
-                working_dir = os.path.dirname(self.paths[manager_type])
+                script_path = self.paths[manager_type]
+                
+                # Check if file exists before launching
+                if not os.path.exists(script_path):
+                    error_msg = f"Script not found: {script_path}"
+                    messagebox.showerror("File Not Found", error_msg)
+                    self.status_label.config(text=f"Error: {self._get_display_name(manager_type)} not found")
+                    return
+
+                working_dir = os.path.dirname(script_path)
                 
                 # Special handling for Run interface and Structure generator
                 env = os.environ.copy()
                 if manager_type in ['run', 'structure']:
                     env['PYTHONPATH'] = working_dir + os.pathsep + env.get('PYTHONPATH', '')
                 
+                # Use CREATE_NO_WINDOW only on Windows
+                creation_flags = 0
+                if os.name == 'nt':  # Windows
+                    creation_flags = subprocess.CREATE_NO_WINDOW
+                
                 process = subprocess.Popen(
-                    ['python', self.paths[manager_type]],
+                    ['python', script_path],
                     stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE,
-                    creationflags=subprocess.CREATE_NO_WINDOW,
+                    creationflags=creation_flags,
                     cwd=working_dir,
                     env=env
                 )
@@ -184,13 +208,9 @@ class SystemManager:
                 self.processes[manager_type] = process
                 
                 display_name = self._get_display_name(manager_type)
-                self._update_status(
-                    manager_type,
-                    "Running"
-                )
-                self.status_label.config(
-                    text=f"{display_name} launched successfully"
-                )
+                self._update_status(manager_type, "Running")
+                self.status_label.config(text=f"{display_name} launched successfully")
+                
             except Exception as e:
                 self._handle_error(f"Failed to launch {self._get_display_name(manager_type)}", e)
         else:
@@ -249,16 +269,22 @@ class SystemManager:
         error_detail = f"{message}: {str(error)}"
         messagebox.showerror("Error", error_detail)
         self.status_label.config(text=f"Error: {message}")
-        print(f"Error occurred: {error_detail}")  # For logging purposes
+        print(f"Error occurred: {error_detail}")
 
 def main():
+    # Import sys here to avoid issues if not available
+    import sys
+    
     root = tk.Tk()
-    root.minsize(500, 550)  # Adjusted minimum window size
+    root.minsize(500, 550)
     
     # Set window icon if available
     icon_path = os.path.join(os.path.dirname(__file__), 'assets', 'icon.ico')
     if os.path.exists(icon_path):
-        root.iconbitmap(icon_path)
+        try:
+            root.iconbitmap(icon_path)
+        except:
+            pass  # Ignore icon errors
     
     app = SystemManager(root)
     root.mainloop()
