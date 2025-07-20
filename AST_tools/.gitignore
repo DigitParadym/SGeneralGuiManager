@@ -1,0 +1,241 @@
+# ================================================================
+# FICHIER .GITIGNORE PROFESSIONNEL - PROJET COLAB_TOOLS
+# ================================================================
+# Ce fichier definit tous les elements a ignorer par Git
+# pour maintenir un repository propre et professionnel
+
+# ================================================================
+# PYTHON - Fichiers de cache et compilation
+# ================================================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# ================================================================
+# ENVIRONNEMENTS VIRTUELS
+# ================================================================
+venv/
+.venv/
+env/
+.env/
+ENV/
+env.bak/
+venv.bak/
+.conda/
+conda-meta/
+
+# ================================================================
+# FICHIERS SPECIFIQUES AU PROJET COLAB_TOOLS
+# ================================================================
+
+# Fichiers de sauvegarde generes par nos scripts
+*backup*
+*.backup
+*.bak
+*.backup_*
+*_backup_*
+interface_gui_principale_backup*.py
+transformation_loader.py.backup*
+*.py.backup_*
+
+# Dossiers de sortie des transformations
+tests/output/
+tests/temp/
+transformations_gui_*/
+transformations_batch_*/
+transformations_ai_*/
+output_*/
+temp_*/
+
+# Fichiers de logs et rapports
+*.log
+correction_tests_report.md
+rapport_*.md
+logs/
+reports/
+
+# Fichiers temporaires de developpement
+debug_*.py
+temp_*.py
+test_temp*.py
+scratch_*.py
+
+# Cache des tests pytest
+.pytest_cache/
+.cache/
+.coverage
+htmlcov/
+
+# ================================================================
+# EDITEURS DE CODE ET IDE
+# ================================================================
+
+# Visual Studio Code
+.vscode/
+*.code-workspace
+
+# PyCharm
+.idea/
+*.iml
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim/Neovim
+*.swp
+*.swo
+*~
+.netrwhist
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# ================================================================
+# SYSTEMES D'EXPLOITATION
+# ================================================================
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+# ================================================================
+# DOCUMENTATION ET RESSOURCES
+# ================================================================
+
+# Fichiers de documentation temporaires
+*.docx
+*.doc
+*.pdf
+*.tmp
+
+# Fichiers README multiples (garder seulement README.md principal)
+readme.docx
+README.txt
+readme.txt
+
+# ================================================================
+# DONNEES ET CONFIGURATION
+# ================================================================
+
+# Cles et secrets
+.env
+.env.local
+.env.production
+secrets.json
+config_local.json
+api_keys.txt
+
+# Bases de donnees locales
+*.db
+*.sqlite
+*.sqlite3
+
+# ================================================================
+# FICHIERS DE DEVELOPPEMENT ET DEBUG
+# ================================================================
+
+# Profiling
+*.prof
+*.profile
+
+# Coverage reports
+.coverage
+.coverage.*
+coverage.xml
+*.cover
+.hypothesis/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# ================================================================
+# PAQUETS ET DISTRIBUTIONS
+# ================================================================
+
+# setuptools
+.eggs/
+*.egg-info/
+dist/
+build/
+
+# ================================================================
+# EXCEPTIONS - FICHIERS A GARDER
+# ================================================================
+# Utilisez ! pour forcer l'inclusion de fichiers normalement ignores
+
+# Garder les fichiers __init__.py (essentiels pour Python)
+!**/__init__.py
+
+# Garder la structure des dossiers de test vides
+!tests/output/.gitkeep
+!tests/temp/.gitkeep
+
+# Garder les fichiers de configuration essentiels
+!tests/config/test_settings.json
+
+# ================================================================
+# NOTES D'UTILISATION
+# ================================================================
+# Pour verifier ce qui sera ignore : git status --ignored
+# Pour forcer l'ajout d'un fichier ignore : git add -f filename
+# Pour supprimer du cache un fichier deja tracke : git rm --cached filename

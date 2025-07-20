@@ -1,87 +1,87 @@
-Analyseur de Dépendances de Projet (import_mapper.py)
-import_mapper.py est un outil d'analyse statique en ligne de commande qui parcourt un projet Python pour cartographier toutes les dépendances d'importation entre les modules. Il génère un rapport détaillé au format JSON, enrichi de métadonnées et de statistiques, pour fournir une vue d'ensemble claire de l'architecture du projet.
+Analyseur de Dependances de Projet (import_mapper.py)
+import_mapper.py est un outil d'analyse statique en ligne de commande qui parcourt un projet Python pour cartographier toutes les dependances d'importation entre les modules. Il genere un rapport detaille au format JSON, enrichi de metadonnees et de statistiques, pour fournir une vue d'ensemble claire de l'architecture du projet.
 
-Table des Matières
+Table des Matieres
 Objectif de l'Outil
 
 Principes de Conception
 
-Feuille de Route Stratégique
+Feuille de Route Strategique
 
 Phase 1 : Produit Minimum Viable (MVP)
 
-Phase 2 : Évolution vers un "Mission Control" de Projet
+Phase 2 : Evolution vers un "Mission Control" de Projet
 
-Architecture Suggérée (Phase 1)
+Architecture Suggeree (Phase 1)
 
 Utilisation (Ligne de Commande)
 
 Structure du Rapport JSON
 
 Objectif de l'Outil
-Cet analyseur est conçu pour aider les développeurs à :
+Cet analyseur est concu pour aider les developpeurs a :
 
-Visualiser l'Architecture : Comprendre rapidement comment les différentes parties d'un projet sont connectées.
+Visualiser l'Architecture : Comprendre rapidement comment les differentes parties d'un projet sont connectees.
 
-Détecter les Dépendances Complexes : Identifier facilement les dépendances inattendues, les couplages forts ou les potentiels imports circulaires.
+Detecter les Dependances Complexes : Identifier facilement les dependances inattendues, les couplages forts ou les potentiels imports circulaires.
 
-Faciliter la Refactorisation : Avant de modifier un fichier, il est possible de voir immédiatement quels autres modules seront impactés, réduisant ainsi les risques de régression.
+Faciliter la Refactorisation : Avant de modifier un fichier, il est possible de voir immediatement quels autres modules seront impactes, reduisant ainsi les risques de regression.
 
 Principes de Conception
-API-First : La logique principale est encapsulée dans une classe ImportMapper pour être facilement intégrable dans d'autres outils (comme le SGeneralGuiManager). Le script en ligne de commande est un simple "wrapper" autour de cette API.
+API-First : La logique principale est encapsulee dans une classe ImportMapper pour etre facilement integrable dans d'autres outils (comme le SGeneralGuiManager). Le script en ligne de commande est un simple "wrapper" autour de cette API.
 
-Robustesse : L'analyse continue même si des fichiers contiennent des erreurs de syntaxe. Les erreurs sont documentées dans le rapport final.
+Robustesse : L'analyse continue meme si des fichiers contiennent des erreurs de syntaxe. Les erreurs sont documentees dans le rapport final.
 
-Performance et UX : L'expérience utilisateur est prise en compte pour les grands projets, avec une barre de progression et des timeouts pour éviter les blocages.
+Performance et UX : L'experience utilisateur est prise en compte pour les grands projets, avec une barre de progression et des timeouts pour eviter les blocages.
 
-Feuille de Route Stratégique
+Feuille de Route Strategique
 Phase 1 : Produit Minimum Viable (MVP)
-L'objectif de cette phase est de créer un outil en ligne de commande fonctionnel et robuste.
+L'objectif de cette phase est de creer un outil en ligne de commande fonctionnel et robuste.
 
-Analyse Récursive : Scanne tous les fichiers .py dans le dossier cible, en ignorant les répertoires spécifiés dans la configuration (ex: venv, .git, *_test.py).
+Analyse Recursive : Scanne tous les fichiers .py dans le dossier cible, en ignorant les repertoires specifies dans la configuration (ex: venv, .git, *_test.py).
 
-Catégorisation des Dépendances : Sépare intelligemment les imports en trois catégories : stdlib, external, et internal.
+Categorisation des Dependances : Separe intelligemment les imports en trois categories : stdlib, external, et internal.
 
-Gestion des Imports Relatifs : Résout les imports relatifs en chemins absolus.
+Gestion des Imports Relatifs : Resout les imports relatifs en chemins absolus.
 
-Rapport JSON Structuré : Génère un rapport complet avec metadata, statistics, et dependency_map.
+Rapport JSON Structure : Genere un rapport complet avec metadata, statistics, et dependency_map.
 
-Granularité des Imports : Offre un mode --detailed pour décomposer les imports.
+Granularite des Imports : Offre un mode --detailed pour decomposer les imports.
 
-Options de Sortie : Permet de spécifier un dossier de sortie avec --output-dir.
+Options de Sortie : Permet de specifier un dossier de sortie avec --output-dir.
 
-Phase 2 : Évolution vers un "Mission Control" de Projet
-Cette phase transforme l'outil en une plateforme d'analyse avancée, intégrée à l'interface SGeneralGuiManager.
+Phase 2 : Evolution vers un "Mission Control" de Projet
+Cette phase transforme l'outil en une plateforme d'analyse avancee, integree a l'interface SGeneralGuiManager.
 
-Détection de "Code Smells" : Met en place un système d'alertes automatiques basé sur des seuils définis dans un fichier config.yaml.
+Detection de "Code Smells" : Met en place un systeme d'alertes automatiques base sur des seuils definis dans un fichier config.yaml.
 
-Suivi Temporel et Historique : Conserve des "snapshots" des analyses dans une base de données SQLite pour suivre l'évolution de l'architecture.
+Suivi Temporel et Historique : Conserve des "snapshots" des analyses dans une base de donnees SQLite pour suivre l'evolution de l'architecture.
 
-Visualisation Graphique : Génère des graphiques de dépendances interactifs avec des options de clustering et de filtrage.
+Visualisation Graphique : Genere des graphiques de dependances interactifs avec des options de clustering et de filtrage.
 
-Intégration GUI "Mission Control" : Intègre toutes ces fonctionnalités dans le SGeneralGuiManager pour en faire un véritable tableau de bord de santé de projet.
+Integration GUI "Mission Control" : Integre toutes ces fonctionnalites dans le SGeneralGuiManager pour en faire un veritable tableau de bord de sante de projet.
 
-Architecture Suggérée (Phase 1)
+Architecture Suggeree (Phase 1)
 import_mapper/
-├── __init__.py
-├── import_mapper.py          # Wrapper CLI (utilise argparse)
-├── core/
-│   ├── __init__.py
-│   ├── mapper.py             # Classe principale ImportMapper (API)
-│   ├── visitor.py            # Classe ImportVisitor (logique AST)
-│   ├── resolver.py           # Logique de résolution des imports relatifs
-│   └── utils.py              # Fonctions génériques (filtrage, formatage)
-└── config/
-    └── default_config.yaml   # Configuration des seuils et exclusions
+ __init__.py
+ import_mapper.py          # Wrapper CLI (utilise argparse)
+ core/
+    __init__.py
+    mapper.py             # Classe principale ImportMapper (API)
+    visitor.py            # Classe ImportVisitor (logique AST)
+    resolver.py           # Logique de resolution des imports relatifs
+    utils.py              # Fonctions generiques (filtrage, formatage)
+ config/
+     default_config.yaml   # Configuration des seuils et exclusions
 
 Utilisation (Ligne de Commande)
 # Analyser le dossier courant
 python import_mapper.py
 
-# Analyser un dossier spécifique et sauvegarder le rapport
+# Analyser un dossier specifique et sauvegarder le rapport
 python import_mapper.py /chemin/vers/projet --output rapport.json
 
-# Lancer une analyse détaillée
+# Lancer une analyse detaillee
 python import_mapper.py /chemin/vers/projet --detailed
 
 Structure du Rapport JSON

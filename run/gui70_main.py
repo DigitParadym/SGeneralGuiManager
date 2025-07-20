@@ -291,13 +291,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         modular_count = len(self.modular_files.selectedItems()) if self.modular_section.isChecked() else 0
         env_text = (
             "Environment Information:\n\n"
-            f"• History Directory: {self.run_manager.srun_dir}\n"
-            f"• History File: {self.run_manager.history_file}\n"
-            f"• Python Version: {sys.version.split()[0]}\n"
-            f"• Working Directory: {os.getcwd()}\n"
-            f"• Script Directory: {os.path.dirname(self.script_path.text()) if self.script_path.text() else 'Not selected'}\n"
-            f"• Modular Files: {modular_count} selected\n"
-            "• Virtual Environment Status: " + 
+            f" History Directory: {self.run_manager.srun_dir}\n"
+            f" History File: {self.run_manager.history_file}\n"
+            f" Python Version: {sys.version.split()[0]}\n"
+            f" Working Directory: {os.getcwd()}\n"
+            f" Script Directory: {os.path.dirname(self.script_path.text()) if self.script_path.text() else 'Not selected'}\n"
+            f" Modular Files: {modular_count} selected\n"
+            " Virtual Environment Status: " + 
             ("Found" if os.path.exists(os.path.join(self.run_manager.srun_dir, 'venv')) 
              else "Not Found")
         )

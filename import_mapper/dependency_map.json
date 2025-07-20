@@ -1,0 +1,74 @@
+{
+  "metadata": {
+    "project_path": "C:\\Users\\User\\SGeneralGuiManager\\import_mapper",
+    "generation_date": "2025-07-17T02:50:42.594474Z",
+    "files_analyzed": 8,
+    "parsing_errors": []
+  },
+  "statistics": {
+    "most_imported_modules": {
+      "pathlib.Path": 3,
+      "sys": 2,
+      "ast": 2,
+      "tkinter": 1,
+      "tkinter.ttk": 1
+    },
+    "most_dependent_files": [
+      "core/mapper.py",
+      "import_mapper.py",
+      "analysis_interface.py",
+      "core/visitor.py",
+      "core/resolver.py"
+    ]
+  },
+  "dependency_map": {
+    "analysis_interface.py": {
+      "stdlib": [
+        "tkinter",
+        "tkinter.filedialog",
+        "tkinter.ttk"
+      ]
+    },
+    "import_mapper.py": {
+      "stdlib": [
+        "argparse",
+        "pathlib.Path",
+        "sys"
+      ],
+      "internal": [
+        "import_mapper.core.mapper.ImportMapper"
+      ]
+    },
+    "core/mapper.py": {
+      "stdlib": [
+        "ast",
+        "collections.Counter",
+        "datetime.datetime",
+        "json",
+        "pathlib.Path"
+      ],
+      "internal": [
+        "core.utils.classify_import",
+        "core.visitor.ImportVisitor"
+      ]
+    },
+    "core/resolver.py": {
+      "stdlib": [
+        "pathlib.Path"
+      ]
+    },
+    "core/utils.py": {
+      "stdlib": [
+        "sys"
+      ]
+    },
+    "core/visitor.py": {
+      "stdlib": [
+        "ast"
+      ],
+      "internal": [
+        "core.resolver.resolve_relative_import"
+      ]
+    }
+  }
+}

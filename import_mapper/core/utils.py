@@ -1,5 +1,17 @@
-def is_stdlib_module(name):
-    return name in ("os", "sys", "math")
+import sys
 
-def format_import(name):
-    return name.strip()
+stdlib = set(sys.stdlib_module_names)
+
+def classify_import(name):
+    if not name:
+        return "internal"
+    top = name.split('.')[0]
+    if top in stdlib:
+        return "stdlib"
+    try:
+        spec = __import__(top).__spec__
+        if spec and 'site-packages' in (spec.origin or ''):
+            return "external"
+    except:
+        pass
+    return "internal"

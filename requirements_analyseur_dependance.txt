@@ -1,0 +1,63 @@
+Objectif
+Ce document definit les bibliotheques Python externes requises pour faire fonctionner et developper l'outil import_mapper.py. Le fait de declarer formellement ces dependances garantit que tout developpeur peut recreer l'environnement de travail de maniere fiable.
+
+Strategie de Gestion des Dependances
+Pour un projet robuste, il est crucial de separer les dependances en fonction de leur usage. Nous utiliserons le standard moderne pyproject.toml pour gerer cela de maniere centralisee.
+
+Les dependances seront groupees comme suit :
+
+Dependances de base (dependencies): Le minimum requis pour que l'outil fonctionne.
+
+Dependances de developpement (dev): Outils necessaires pour les tests, le formatage et le linting.
+
+Dependances de visualisation (viz): Bibliotheques optionnelles pour la generation de graphiques.
+
+Cette approche permet a un utilisateur d'installer uniquement ce dont il a besoin. Par exemple :
+
+Installation de base : pip install .
+
+Installation pour le developpement : pip install .[dev]
+
+Fichier pyproject.toml Detaille
+Voici la structure recommandee pour le fichier pyproject.toml qui integre cette gestion specialisee des dependances.
+
+# Fichier: pyproject.toml
+
+[project]
+name = "import_mapper"
+version = "1.0.0"
+description = "Un outil d'analyse statique pour cartographier les dependances d'un projet Python."
+authors = [
+    {name = "Votre Nom", email = "votre@email.com"},
+]
+requires-python = ">=3.8"
+
+# Dependances minimales pour faire fonctionner l'outil
+dependencies = [
+    "pyyaml",  # Pour la configuration
+]
+
+[project.optional-dependencies]
+# Dependances pour les developpeurs (tests, etc.)
+dev = [
+    "pytest",
+    "black",
+    "ruff",
+]
+
+# Dependances pour les fonctionnalites de visualisation
+viz = [
+    "networkx",
+    "matplotlib",
+]
+
+# Dependances pour l'interface en ligne de commande (CLI)
+cli = [
+    "tqdm", # Pour les barres de progression
+]
+
+[project.scripts]
+import-mapper = "import_mapper.cli:main"
+
+Recommandation
+Adopter cette structure pyproject.toml des le debut de la Phase 1 est ma recommandation finale. C'est la methode la plus propre et la plus evolutive pour gerer les dependances d'un projet Python moderne. Elle centralise toute la configuration du projet en un seul endroit.

@@ -1,0 +1,405 @@
+C:/Users/User/SGeneralGuiManager
+├── .git
+│   ├── COMMIT_EDITMSG
+│   ├── config
+│   ├── description
+│   ├── FETCH_HEAD
+│   ├── HEAD
+│   ├── hooks
+│   │   ├── applypatch-msg.sample
+│   │   ├── commit-msg.sample
+│   │   ├── fsmonitor-watchman.sample
+│   │   ├── post-update.sample
+│   │   ├── pre-applypatch.sample
+│   │   ├── pre-commit.sample
+│   │   ├── pre-merge-commit.sample
+│   │   ├── pre-push.sample
+│   │   ├── pre-rebase.sample
+│   │   ├── pre-receive.sample
+│   │   ├── prepare-commit-msg.sample
+│   │   ├── push-to-checkout.sample
+│   │   ├── sendemail-validate.sample
+│   │   └── update.sample
+│   ├── index
+│   ├── info
+│   │   └── exclude
+│   ├── logs
+│   │   ├── HEAD
+│   │   └── refs
+│   │       ├── heads
+│   │       │   └── main
+│   │       └── remotes
+│   │           └── origin
+│   │               └── main
+│   ├── objects
+│   │   ├── 05
+│   │   │   └── 7f6cd26cf342bfc403cb0191990045f6039162
+│   │   ├── 07
+│   │   │   └── 360c624e035770c26ab40431711f9b9aa8ba71
+│   │   ├── 0b
+│   │   │   └── d1c31d84853e8d86cb00486891d981fedd093a
+│   │   ├── 12
+│   │   │   └── c4ee4b5f0040b0f1d18d0a919e611ed7e84fec
+│   │   ├── 19
+│   │   │   └── 019b1071617610a79bc707e7c3da24b4178556
+│   │   ├── 1f
+│   │   │   ├── 5893cea805b8ef20206bd4a6ad3abec3f61f58
+│   │   │   ├── c22b2e071fadd1219d4317d3c73a6e1dc4977e
+│   │   │   └── d6b1a0a5a4a90a7558fd2e284a14b11ba94598
+│   │   ├── 22
+│   │   │   └── 886febb098ab479569e881ea73918f0a4e0da2
+│   │   ├── 24
+│   │   │   └── 42666c6a40d4b0c124552a4738a618bf442843
+│   │   ├── 25
+│   │   │   └── 7a577d4933075a889b747970366f4426ab6d6f
+│   │   ├── 27
+│   │   │   └── 395419da790dab5f97c458dd1dfa16e6296a0f
+│   │   ├── 28
+│   │   │   └── efc2fb1e151711ac672052bfd5b7dd6166f619
+│   │   ├── 29
+│   │   │   └── d2257a6ab189d6733e88e791455112d45cb739
+│   │   ├── 2c
+│   │   │   └── b4b9bbc97f9b4c0a0092d7e756f1625d8301b2
+│   │   ├── 2d
+│   │   │   └── 4751fe1f5444929bf934a1b30e12ff3faefa3e
+│   │   ├── 30
+│   │   │   └── 73f9d812346bdcee691812f7aea7f54c29e26b
+│   │   ├── 31
+│   │   │   └── 5448d754954d756b785b261ce736e2ed712113
+│   │   ├── 32
+│   │   │   ├── 14566db9e6ba339d1b1fd51157d05a7f6b8325
+│   │   │   └── 9b4e5ab0b1bcfa587b7abcdff817958f6b29e4
+│   │   ├── 33
+│   │   │   └── f9e5412a1fa8732ebe7180f7c11b3b09b917e4
+│   │   ├── 35
+│   │   │   ├── 3a93734fde9bd66ad770fbbdda49a1a9ceb8a9
+│   │   │   └── 62d6051df81539dea7d6aa44ea0c296d2995fc
+│   │   ├── 3c
+│   │   │   └── a8557aeb6c91c4ab4308b1cd50d9997f341b7f
+│   │   ├── 3d
+│   │   │   └── 1234128c10936c1b79793aefaf2084d7d927ef
+│   │   ├── 41
+│   │   │   ├── 5325856a9c42e32861a3c6421f2e57a4770d9f
+│   │   │   └── 6dc5e8bbe833ac7616f1e15a397aa02f8d813e
+│   │   ├── 44
+│   │   │   └── 1098b69b90561c83846450b3c665ea31bedc28
+│   │   ├── 46
+│   │   │   ├── 301e2ac7668fd55667bd721e0cf5b89a55233b
+│   │   │   ├── 5fbdec898afd536f90ed5a562ef423f4ee8f2b
+│   │   │   └── 81f0bc22371a2e709cc06496d210dc897afffb
+│   │   ├── 4b
+│   │   │   └── 5f3d32e75722088863a7bedddfcf1bb69d2be4
+│   │   ├── 4c
+│   │   │   └── 085600a84e1d2cd57e0a6cd0e61ef55909cb7c
+│   │   ├── 51
+│   │   │   └── 907d67bf8125bd01a1c5888aa7a461640b45be
+│   │   ├── 57
+│   │   │   └── 18c41afc029f48896b6dee86d0af9187c7299a
+│   │   ├── 59
+│   │   │   └── 8675fa50298e7e89d7513b1f0d58679d381007
+│   │   ├── 5e
+│   │   │   └── 0e029e87ef874230d0e66a747b7d7f05d6dd70
+│   │   ├── 61
+│   │   │   └── ecea4962db3b71630f83e56522bdeffea3f639
+│   │   ├── 63
+│   │   │   └── 1a0696d1127e9482048c79dedcccec6244f6e9
+│   │   ├── 64
+│   │   │   └── 23a11746549b1c018ba1f7aa3a9f92d197572b
+│   │   ├── 67
+│   │   │   └── 517d352b875f1f16c1c24f45b13a66f608daa1
+│   │   ├── 6a
+│   │   │   └── a2bed8450a306a848835fa729c52334e961c45
+│   │   ├── 70
+│   │   │   └── 73978a0aa0da5437fda352c3fa8e5c7481de10
+│   │   ├── 74
+│   │   │   └── dae6c3ae8d21ec79306d057e37589dff9e99f8
+│   │   ├── 82
+│   │   │   └── 069a4a20279801a4ec5c3983a622cefe58f07e
+│   │   ├── 8a
+│   │   │   └── b66429c255ca800beba3e07fc35ea8fb7dcb9e
+│   │   ├── 96
+│   │   │   └── d051f5b591c9c86d605ced93819a92ff7370da
+│   │   ├── 97
+│   │   │   └── dbc2713e7b5b6e79d65f3d4923c83f65dfca99
+│   │   ├── 98
+│   │   │   └── 1f69ab9991b1dc356d9277ad4050b29c226069
+│   │   ├── 9a
+│   │   │   ├── 26ef537cfb846dee882e34cc5dc78780fe3a7d
+│   │   │   └── 42506ff2c32e22a39b66161cb61496874583e9
+│   │   ├── 9e
+│   │   │   └── 26dfeeb6e641a33dae4961196235bdb965b21b
+│   │   ├── a0
+│   │   │   └── e08a5d0093ec87cced00c76674f680a35f4dfb
+│   │   ├── ab
+│   │   │   └── 27be9e9b132f0d57f64f9fb67ed2c30b14d857
+│   │   ├── ac
+│   │   │   └── 933c5fa81e81d1ecd24f4ace51d381952b1b41
+│   │   ├── b4
+│   │   │   └── 9427a140bbfb00d3fe8e0eeafb1c8b9d6d9924
+│   │   ├── bb
+│   │   │   └── 5d7f4dc9d48402b5e1291f16ae6f032bd994d9
+│   │   ├── bd
+│   │   │   ├── 347f9ea6bb8959cb00e9f54c8caead02c7aeca
+│   │   │   └── e514aab80222064d476dad8b1d79a1a1f09f7c
+│   │   ├── c3
+│   │   │   └── 96171d9401b9e3b2f50ae153fea061e8cb2e96
+│   │   ├── c4
+│   │   │   └── 35baa9cb3ec4369bcf6ce70b39ece302ea8f9d
+│   │   ├── c5
+│   │   │   └── bb4aba5386ec9444fd69382639edf72a14c28e
+│   │   ├── c9
+│   │   │   └── b0938f9f9cec6ac917af1fa1c33653391cfde1
+│   │   ├── d0
+│   │   │   └── 62a7c197eb17fa73303e2504c00b91174efdf7
+│   │   ├── d1
+│   │   │   └── b076bf76447c21d12afb231cb217a5e8957057
+│   │   ├── d3
+│   │   │   └── c6d0b684b1f272df26651e02175dd748ce013e
+│   │   ├── d6
+│   │   │   └── 0fcfe74fe6703bd8fa7acb232ab05b9e651e57
+│   │   ├── db
+│   │   │   └── d841c20150662b58358aded0462b0ea60253b1
+│   │   ├── dc
+│   │   │   └── eb399d6e86b95607a5bb4b1719fb62370467a5
+│   │   ├── e0
+│   │   │   └── e65f8a6fd0c8ccff2e15fde2d70a97e0896b4e
+│   │   ├── e2
+│   │   │   └── da88ea7082616d0eaa930c498f51c325ac9b65
+│   │   ├── e5
+│   │   │   └── 13a0157852eee0c5cae708718bcc25e5f3e99b
+│   │   ├── e6
+│   │   │   └── 9de29bb2d1d6434b8b29ae775ad8c2e48c5391
+│   │   ├── ed
+│   │   │   └── b613ba106ade476fa6b6599725b5917ef79c98
+│   │   ├── ef
+│   │   │   └── 2cfa4ba709367280884782e38eddcd037cac70
+│   │   ├── f1
+│   │   │   └── ce555825ee5d6328b5ed0a3cea6a742014c3b8
+│   │   ├── info
+│   │   └── pack
+│   └── refs
+│       ├── heads
+│       │   └── main
+│       ├── remotes
+│       │   └── origin
+│       │       └── main
+│       └── tags
+│           └── v1.0
+├── .gitignore
+├── build
+│   ├── copypaste_manager
+│   │   ├── Analysis-00.toc
+│   │   ├── base_library.zip
+│   │   ├── copypaste_manager.pkg
+│   │   ├── EXE-00.toc
+│   │   ├── localpycs
+│   │   │   ├── pyimod01_archive.pyc
+│   │   │   ├── pyimod02_importers.pyc
+│   │   │   ├── pyimod03_ctypes.pyc
+│   │   │   ├── pyimod04_pywin32.pyc
+│   │   │   └── struct.pyc
+│   │   ├── PKG-00.toc
+│   │   ├── PYZ-00.pyz
+│   │   ├── PYZ-00.toc
+│   │   ├── warn-copypaste_manager.txt
+│   │   └── xref-copypaste_manager.html
+│   └── copypaste_manager_corrected_V1
+│       ├── Analysis-00.toc
+│       ├── base_library.zip
+│       ├── copypaste_manager_corrected_V1.pkg
+│       ├── EXE-00.toc
+│       ├── localpycs
+│       │   ├── pyimod01_archive.pyc
+│       │   ├── pyimod02_importers.pyc
+│       │   ├── pyimod03_ctypes.pyc
+│       │   ├── pyimod04_pywin32.pyc
+│       │   └── struct.pyc
+│       ├── PKG-00.toc
+│       ├── PYZ-00.pyz
+│       ├── PYZ-00.toc
+│       ├── warn-copypaste_manager_corrected_V1.txt
+│       └── xref-copypaste_manager_corrected_V1.html
+├── config.json
+├── connectorpro
+│   ├── connectorpro_core.log
+│   ├── connectorpro_core.py
+│   ├── connectorpro_gui.py
+│   ├── data
+│   │   ├── connectorpro.log
+│   │   ├── connectorpro_actions.csv
+│   │   └── withus
+│   │       └── connectorpro_actions.csv
+│   ├── gui_component.py
+│   ├── main.py
+│   ├── __init__.py
+├── copypaste_manager.py
+├── copypaste_manager.spec
+├── copypaste_manager_corrected_V1.spec
+├── data
+│   ├── backup
+│   │   └── paths_backup.json
+│   ├── cache
+│   ├── config
+│   │   └── logging.json
+│   └── indexes
+│       ├── paths.json
+│       └── paths.json.bak
+├── dist
+│   ├── copypaste_manager.exe
+│   └── copypaste_manager_corrected_V1.exe
+├── Folder
+│   ├── FolderCopypaste_interface.py
+│   └── __init__.py
+├── indexNavigator
+│   ├── core
+│   │   ├── data_manager.py
+│   │   ├── index_control.py
+│   │   ├── index_manager.py
+│   │   ├── navigator_core.py
+│   │   ├── __init__.py
+│   ├── data
+│   │   ├── backup
+│   │   │   └── paths_backup.json
+│   │   ├── cache
+│   │   ├── config
+│   │   │   ├── gui_config.json
+│   │   │   └── logging.json
+│   │   ├── indexes
+│   │   │   ├── paths.json
+│   │   │   └── paths.json.bak
+│   │   └── metadata
+│   ├── dev_gui
+│   │   ├── complete-gui-builder_V1.py
+│   │   ├── gui_builder.py
+│   │   ├── gui_components.py
+│   │   ├── gui_controller.py
+│   │   ├── gui_error_handler.py
+│   │   ├── __init__.py
+│   ├── logs
+│   │   ├── CoreManager_20241119.log
+│   │   ├── CoreManager_20241120.log
+│   │   ├── CoreManager_error.log
+│   │   ├── core_operations_20241119.log
+│   │   ├── DataManager_20241120.log
+│   │   ├── DataManager_20241121.log
+│   │   ├── DataManager_error.log
+│   │   ├── datamanager_operations_20241120.log
+│   │   ├── datamanager_operations_20241121.log
+│   │   ├── GUIErrorHandler_20241121.log
+│   │   ├── GUIErrorHandler_error.log
+│   │   ├── guierrorhandler_operations_20241121.log
+│   │   ├── IndexControl_20241121.log
+│   │   ├── IndexControl_error.log
+│   │   ├── indexcontrol_operations_20241121.log
+│   │   ├── IndexManager_20241119.log
+│   │   ├── IndexManager_20241120.log
+│   │   ├── IndexManager_20241121.log
+│   │   ├── IndexManager_error.log
+│   │   ├── indexmanager_operations_20241120.log
+│   │   ├── indexmanager_operations_20241121.log
+│   │   ├── IndexNavigatorGUI_20241120.log
+│   │   ├── IndexNavigatorGUI_20241121.log
+│   │   ├── IndexNavigatorGUI_error.log
+│   │   ├── indexnavigatorgui_operations_20241120.log
+│   │   ├── indexnavigatorgui_operations_20241121.log
+│   │   ├── IndexNavigator_20241119.log
+│   │   ├── IndexNavigator_20241120.log
+│   │   ├── IndexNavigator_20241121.log
+│   │   ├── IndexNavigator_error.log
+│   │   ├── indexnavigator_operations_20241120.log
+│   │   ├── indexnavigator_operations_20241121.log
+│   │   ├── index_operations_20241119.log
+│   │   ├── NavigatorCore_20241121.log
+│   │   ├── NavigatorCore_error.log
+│   │   └── navigatorcore_operations_20241121.log
+│   ├── run_app.py
+│   ├── utils
+│   │   ├── formatter.py
+│   │   ├── logger.py
+│   │   ├── __init__.py
+│   ├── __init__.py
+├── Individual
+│   ├── copypaste_individual_manager.py
+│   ├── SCopypastIndividual
+│   └── __init__.py
+├── logs
+│   ├── core_operations_20241119.log
+│   ├── DataManager_20241121.log
+│   ├── DataManager_error.log
+│   ├── datamanager_operations_20241121.log
+│   ├── IndexManager_20241121.log
+│   ├── IndexManager_error.log
+│   ├── indexmanager_operations_20241121.log
+│   ├── index_operations_20241119.log
+│   ├── NavigatorCore_20241121.log
+│   ├── NavigatorCore_error.log
+│   └── navigatorcore_operations_20241121.log
+├── pointer
+│   ├── P1-unzip-connector
+│   │   ├── logs
+│   │   │   ├── error.log
+│   │   │   ├── pointer_connector.log
+│   │   │   ├── pointer_connector_20241115.log
+│   │   │   ├── pointer_connector_20241116.log
+│   │   │   ├── pointer_connector_20241117.log
+│   │   │   └── pointer_connector_error.log
+│   │   ├── PointerUnzipConnector.py
+│   │   ├── pointer_connector_gui.log
+│   │   ├── pointer_system_20241115.log
+│   │   └── __init___.py
+│   └── __init___.py
+├── rename
+│   ├── init-file.py
+│   ├── logs
+│   │   ├── rename_system_20241114.log
+│   │   ├── rename_system_20241115.log
+│   │   ├── rename_system_20241116.log
+│   │   ├── rename_system_20241119.log
+│   │   ├── rename_system_20241120.log
+│   │   ├── rename_system_20241121.log
+│   │   ├── rename_system_20241122.log
+│   │   ├── rename_system_20250602.log
+│   │   ├── rename_system_20250605.log
+│   │   ├── rename_system_20250611.log
+│   │   ├── rename_system_20250618.log
+│   │   ├── rename_system_20250623.log
+│   │   ├── rename_system_20250624.log
+│   │   ├── rename_system_20250626.log
+│   │   ├── rename_system_20250701.log
+│   │   ├── rename_system_20250703.log
+│   │   ├── rename_system_20250704.log
+│   │   └── rename_system_20250705.log
+│   ├── main_window.py
+│   ├── srename_interface.py
+│   ├── __init__.py
+├── run
+│   ├── .srun
+│   │   ├── 3History
+│   │   ├── 3History.log
+│   │   ├── 4History
+│   │   ├── 4History.log
+│   │   ├── 5History.log
+│   │   ├── indexNavigator.log
+│   │   ├── ModularLink-Renamepro.log
+│   │   ├── ModularLink.log
+│   │   ├── pointer.log
+│   │   ├── run_history.log
+│   │   └── SRun - Shortcut.lnk
+│   ├── gui70_interface.py
+│   ├── gui70_main.py
+│   ├── OneHistory.log
+│   ├── run70_functions.py
+│   ├── run_history.log
+│   ├── script_runner.log
+│   ├── TwoHistory.log
+│   ├── __init__.py
+├── structure
+│   ├── file_structure_generator.py
+│   └── last_structure.txt
+├── SUnZip
+│   ├── logs
+│   │   ├── pointer_connector_20241116.log
+│   │   └── pointer_connector_20241117.log
+│   ├── unzip_utility.py
+│   ├── __init___.py
+└── __init__.py
