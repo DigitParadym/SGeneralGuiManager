@@ -1,7 +1,5 @@
 # ===================================================================
-# FICHIER : copypaste_manager.py (Version Originale)
-# Orchestrateur qui affiche les modules dans des groupes logiques
-# et inclut une interface de selection pour les outils d'analyse.
+# FICHIER : copypaste_manager.py (Version 1 Corrigée)
 # ===================================================================
 import os
 import sys
@@ -9,8 +7,6 @@ import subprocess
 import tkinter as tk
 from tkinter import ttk, messagebox
 from tkinter import font as tkfont
-
-print("--- TEST: JE LANCE BIEN LA VERSION MODIFIÉE DU FICHIER ---")
 
 # --- Importation des classes d'interface integrables ---
 try:
@@ -58,7 +54,7 @@ class SystemManager:
         self.original_geometry = "600x800"
         self.extended_geometry = "1400x750"
 
-        # Configuration statique des groupes et des modules
+        # Configuration statique des groupes et des modules (CORRIGÉE)
         self.module_groups = {
             "Main Tools": [
                 {'file': 'main.py', 'path': 'connectorpro', 'display': 'ConnectorPro'},
@@ -82,7 +78,7 @@ class SystemManager:
             for module_config in modules:
                 module_key = os.path.join(module_config['path'], module_config['file'])
                 
-                is_integrated_file = any(module_config['file'].endswith(suffix) for suffix in ['_interface.py', '_manager.py', '_generator.py', '_interface_tk.py'])
+                is_integrated_file = any(module_config['file'].endswith(suffix) for suffix in ['_interface.py', '_manager.py', '_generator.py', '_interface_tk.py', '_principale.py'])
 
                 self.discovered_modules[module_key] = {
                     'path': os.path.join(self.base_path, module_key),
