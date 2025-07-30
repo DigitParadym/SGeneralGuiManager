@@ -1,271 +1,218 @@
-# ===================================================================
-# FICHIER : copypaste_manager.py (Final et Corrigé)
-# ===================================================================
-import os
-import sys
-import subprocess
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+System Manager - Version Stable
+Gestionnaire d'applications unifie - AST en mode integre simple
+"""
+
 import tkinter as tk
-from tkinter import ttk, messagebox
-from tkinter import font as tkfont
-import multiprocessing # <-- Import pour la compatibilité .exe
-
-# --- Importation des classes d'interface integrables ---
-try:
-    from Folder.FolderCopypaste_interface import AdvancedCopypasteInterface
-    from structure.file_structure_generator import StructureGeneratorInterface
-    from Individual.copypaste_individual_manager import IndividualCopypasteInterface
-    from run.run_interface_tk import RunInterface
-    from import_mapper.analysis_interface import AnalysisToolsInterface
-    from AST_tools.composants_browser.interface_gui_principale import InterfaceAST
-    INTEGRATED_MODULES_AVAILABLE = True
-except ImportError as e:
-    print(f"WARNING: One or more interface modules could not be imported. {e}")
-    # Classes factices pour eviter que le programme ne plante
-    class AdvancedCopypasteInterface: 
-        def __init__(self, parent): pass
-    class StructureGeneratorInterface: 
-        def __init__(self, parent): pass
-    class IndividualCopypasteInterface: 
-        def __init__(self, parent): pass
-    class RunInterface: 
-        def __init__(self, parent): pass
-    class AnalysisToolsInterface: 
-        def __init__(self, parent): pass
-    class InterfaceAST: 
-        def __init__(self, parent): pass
-    INTEGRATED_MODULES_AVAILABLE = False
-
+from tkinter import ttk
+import subprocess
+import sys
+import os
+from pathlib import Path
 
 class SystemManager:
-    """
-    Gestionnaire de systeme qui integre dynamiquement des sous-applications
-    base sur une configuration de groupes personnalises.
-    """
-    
-    def __init__(self, root):
-        self.root = root
+    def __init__(self):
+        self.root = tk.Tk()
         self.root.title("System Manager")
+        self.root.geometry("600x500")
         
-        self.processes = {}
-        self.base_path = self._get_base_path()
-        
+        # Variables
+        self.main_pane = None
         self.active_integrated_frame = None
-        self.active_integrated_key = None
         
-        self.original_geometry = "600x800"
-        self.extended_geometry = "1400x750"
-
-        # Configuration statique des groupes et des modules
-        self.module_groups = {
-            "Main Tools": [
-                {'file': 'main.py', 'path': 'connectorpro', 'display': 'ConnectorPro'},
-                {'file': 'run_interface_tk.py', 'path': 'run', 'display': 'Run Interface'}
-            ],
-            "File Management": [
-                {'file': 'main_window.py', 'path': 'rename', 'display': 'Smart Rename System'},
-                {'file': 'copypaste_individual_manager.py', 'path': 'Individual', 'display': 'Individual Manager'},
-                {'file': 'FolderCopypaste_interface.py', 'path': 'Folder', 'display': 'Folder Manager'},
-                {'file': 'file_structure_generator.py', 'path': 'structure', 'display': 'File Structure Generator'}
-            ],
-            "Outils D'analyse": [
-                {'file': 'import_mapper.py', 'path': 'import_mapper', 'display': 'Analyseur de Dependances'},
-                {'file': 'interface_gui_principale.py', 'path': 'AST_tools', 'display': 'Interface AST - Transformations'}
-            ]
+        # Configuration des modules
+        self.modules = {
+            "ConnectorPro": {
+                "name": "ConnectorPro",
+                "status": "Ready",
+                "launch_mode": "external",
+                "script": "connectorpro/main.py"
+            },
+            "AST - Transformations": {
+                "name": "Interface AST - Transformations", 
+                "status": "Ready",
+                "launch_mode": "integrated",
+                "script": "AST_tools/composants_browser/interface_gui_principale.py"
+            },
+            "Smart Rename System": {
+                "name": "Smart Rename System",
+                "status": "Ready", 
+                "launch_mode": "external",
+                "script": "rename/main_window.py"
+            },
+            "Individual Manager": {
+                "name": "Individual Manager",
+                "status": "Ready",
+                "launch_mode": "external", 
+                "script": "Individual/copypaste_individual_manager.py"
+            }
         }
-
-        self.discovered_modules = {}
-        for group, modules in self.module_groups.items():
-            for module_config in modules:
-                module_key = os.path.join(module_config['path'], module_config['file'])
-                is_integrated_file = any(module_config['file'].endswith(s) for s in ['_interface.py', '_manager.py', '_generator.py', '_interface_tk.py', '_principale.py'])
-                self.discovered_modules[module_key] = {
-                    'path': os.path.join(self.base_path, module_key),
-                    'display_name': module_config['display'],
-                    'directory': module_config['path'],
-                    'file': module_config['file'],
-                    'is_integrated': is_integrated_file,
-                    'class': self._get_class_for_file(module_config['file']) 
-                }
         
-        self.gui_elements = {key: {'status': None, 'button': None} for key in self.discovered_modules}
-        self.root.geometry(self.original_geometry)
-        self._create_gui()
-        self.root.after(1000, self._check_process_status)
-
-    def _get_base_path(self):
-        if getattr(sys, 'frozen', False): return sys._MEIPASS
-        else: return os.path.dirname(os.path.abspath(__file__))
-
-    def _get_class_for_file(self, filename):
-        if not INTEGRATED_MODULES_AVAILABLE: return None
-        mapping = {
-            'run_interface_tk.py': RunInterface,
-            'copypaste_individual_manager.py': IndividualCopypasteInterface,
-            'FolderCopypaste_interface.py': AdvancedCopypasteInterface,
-            'file_structure_generator.py': StructureGeneratorInterface,
-            'interface_gui_principale.py': InterfaceAST
-        }
-        return mapping.get(filename)
-
-    def _create_gui(self) -> None:
-        self.main_pane = ttk.PanedWindow(self.root, orient=tk.HORIZONTAL)
-        self.main_pane.pack(fill=tk.BOTH, expand=True)
-        self.left_frame = ttk.Frame(self.main_pane, padding="10")
-        self.main_pane.add(self.left_frame, weight=1)
-        ttk.Label(self.left_frame, text="System Manager", font=('Segoe UI', 14, 'bold')).pack(pady=(0, 10), fill=tk.X)
-        ttk.Label(self.left_frame, text=f"{len(self.discovered_modules)} modules found", font=('Segoe UI', 10)).pack(pady=(0, 10), fill=tk.X)
-        self._create_scrollable_modules(self.left_frame)
-        self.status_label = ttk.Label(self.left_frame, text="All systems are ready", relief=tk.SUNKEN, anchor='w', padding=(5, 2))
-        self.status_label.pack(fill=tk.X, pady=(10, 0), side=tk.BOTTOM)
-        ttk.Button(self.left_frame, text="Refresh Interface", command=self._refresh_modules).pack(pady=(5, 0), side=tk.BOTTOM)
-
-    def _create_scrollable_modules(self, container: ttk.Frame) -> None:
-        canvas_container = ttk.Frame(container)
-        canvas_container.pack(fill=tk.BOTH, expand=True)
-        canvas = tk.Canvas(canvas_container)
-        scrollbar = ttk.Scrollbar(canvas_container, orient="vertical", command=canvas.yview)
-        scrollable_frame = ttk.Frame(canvas)
-        canvas_window = canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
-        def configure_scrollable_frame(event): canvas.itemconfig(canvas_window, width=event.width)
-        def configure_canvas(event): canvas.configure(scrollregion=canvas.bbox("all"))
-        scrollable_frame.bind("<Configure>", configure_canvas)
-        canvas.bind("<Configure>", configure_scrollable_frame)
-        canvas.configure(yscrollcommand=scrollbar.set)
-        canvas.pack(side="left", fill="both", expand=True)
-        scrollbar.pack(side="right", fill="y")
-        for group_name, modules_in_group in self.module_groups.items():
-            section_frame = ttk.LabelFrame(scrollable_frame, text=group_name, padding="5")
-            section_frame.pack(fill=tk.X, pady=5, padx=5, expand=True)
-            if group_name == "Outils D'analyse":
-                try:
-                    analysis_interface = AnalysisToolsInterface(section_frame)
-                    analysis_interface.pack(fill=tk.X, pady=(0, 10))
-                    ttk.Separator(section_frame, orient='horizontal').pack(fill='x', pady=5)
-                except Exception as e:
-                    print(f"Warning: Could not create AnalysisToolsInterface: {e}")
-            for module_config in modules_in_group:
-                module_key = os.path.join(module_config['path'], module_config['file'])
-                self._create_module_frame(section_frame, module_key)
-
-    def _create_module_frame(self, container, module_key):
-        module_info = self.discovered_modules.get(module_key, {})
-        display_name = module_info.get('display_name', 'Unknown')
-        frame = ttk.Frame(container)
-        frame.pack(fill=tk.X, expand=True, pady=4, padx=5)
-        frame.columnconfigure(0, weight=1)
-        text_frame = ttk.Frame(frame)
-        text_frame.grid(row=0, column=0, sticky="w", padx=5)
-        ttk.Label(text_frame, text=display_name, font=tkfont.Font(family="Segoe UI", size=10, weight="bold")).pack(anchor="w")
-        ttk.Label(text_frame, text=module_key, font=tkfont.Font(family="Segoe UI", size=8), foreground="gray").pack(anchor="w")
-        status = ttk.Label(frame, text="Ready", width=10)
-        status.grid(row=0, column=1, sticky="e", padx=5)
-        self.gui_elements[module_key] = {'status': status}
-        command = lambda mk=module_key: self._handle_launch(mk)
-        button = ttk.Button(frame, text="Launch", command=command, width=10)
-        button.grid(row=0, column=2, sticky="e", padx=5)
-        self.gui_elements[module_key]['button'] = button
-
-    def _handle_launch(self, module_key):
-        if self.discovered_modules[module_key].get('is_integrated'):
-            self._handle_integrated_launch(module_key)
-        else:
-            self.launch_external_module(module_key)
-
-    def _handle_integrated_launch(self, module_key):
-        is_already_open = self.active_integrated_frame is not None
-        is_same_module = self.active_integrated_key == module_key
-        if is_already_open:
-            self._close_current_integrated_view()
-            if is_same_module: return
-        self._open_integrated_view(module_key)
-
-    def _open_integrated_view(self, module_key):
-        module_info = self.discovered_modules[module_key]
-        InterfaceClass = module_info.get('class')
-        if not InterfaceClass or not INTEGRATED_MODULES_AVAILABLE:
-            messagebox.showerror("Error", "Interface class not found for this module.")
-            return
-        self.root.geometry(self.extended_geometry)
-        self.active_integrated_frame = InterfaceClass(self.main_pane)
-        self.main_pane.add(self.active_integrated_frame, weight=2)
-        self.active_integrated_key = module_key
-        self._update_status(module_key, "Running")
-        self.gui_elements[module_key]['button'].config(text="Close")
-
-    def _close_current_integrated_view(self):
-        if self.active_integrated_frame:
-            self.main_pane.forget(self.active_integrated_frame)
-            self.active_integrated_frame.destroy()
-            old_key = self.active_integrated_key
-            if old_key and old_key in self.gui_elements:
-                self._update_status(old_key, "Ready")
-                self.gui_elements[old_key]['button'].config(text="Launch")
-            self.active_integrated_frame = None
-            self.active_integrated_key = None
-            self.root.geometry(self.original_geometry)
-
-    def launch_external_module(self, module_key):
-        if self._is_module_running(module_key):
-            messagebox.showinfo("Info", f"{self.discovered_modules[module_key]['display_name']} is already running")
-            return
-        try:
-            module_info = self.discovered_modules[module_key]
-            script_path = module_info['path']
-            if not os.path.exists(script_path):
-                messagebox.showerror("File Not Found", f"Script not found: {script_path}")
-                return
-            working_dir = os.path.dirname(script_path)
-            env = os.environ.copy()
-            env['PYTHONPATH'] = working_dir + os.pathsep + env.get('PYTHONPATH', '')
-            creation_flags = subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0
-            process = subprocess.Popen([sys.executable, script_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE, creationflags=creation_flags, cwd=working_dir, env=env, text=True, errors='ignore')
-            self.processes[module_key] = process
-            self._update_status(module_key, "Running")
-        except Exception as e:
-            self._handle_error(f"Failed to launch {module_info['display_name']}", e)
-
-    def _is_module_running(self, module_key):
-        if self.discovered_modules[module_key].get('is_integrated'):
-            return self.active_integrated_frame is not None
-        process = self.processes.get(module_key)
-        return process is not None and process.poll() is None
-
-    def _check_process_status(self):
-        for module_key, process in list(self.processes.items()):
-            if not self.discovered_modules[module_key].get('is_integrated'):
-                if process is not None and process.poll() is not None:
-                    self.processes[module_key] = None
-                    self._update_status(module_key, "Ready")
-        self.root.after(1000, self._check_process_status)
-
-    def _update_status(self, module_key, status):
-        if module_key in self.gui_elements and self.gui_elements[module_key].get('status'):
-            status_colors = {'Ready': 'black', 'Running': 'green', 'Error': 'red'}
-            self.gui_elements[module_key]['status'].config(text=status, foreground=status_colors.get(status, 'black'))
-            
-    def _refresh_modules(self):
-        for widget in self.root.winfo_children():
-            widget.destroy()
-        self.__init__(self.root)
-
-    def _handle_error(self, message, error):
-        error_detail = f"{message}: {str(error)}"
-        messagebox.showerror("Error", error_detail)
-        print(f"ERROR: {error_detail}")
-
-
-# --- BLOC DE DÉMARRAGE CORRIGÉ ---
-def main():
-    """
-    Fonction principale qui initialise et lance l'application.
-    """
-    # Ajout de freeze_support() pour la compatibilité avec les exécutables (.exe)
-    multiprocessing.freeze_support()
+        self.create_interface()
     
-    root = tk.Tk()
-    app = SystemManager(root)
-    root.mainloop()
+    def create_interface(self):
+        """Cree l'interface principale."""
+        
+        # Titre
+        title_label = ttk.Label(self.root, text="System Manager", 
+                               font=("Arial", 16, "bold"))
+        title_label.pack(pady=10)
+        
+        # Info
+        info_label = ttk.Label(self.root, text=str(len(self.modules)) + " modules found")
+        info_label.pack(pady=(0, 20))
+        
+        # Frame principal avec PanedWindow
+        main_frame = ttk.Frame(self.root)
+        main_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+        
+        # PanedWindow pour interface integree
+        self.main_pane = ttk.PanedWindow(main_frame, orient=tk.HORIZONTAL)
+        self.main_pane.pack(fill=tk.BOTH, expand=True)
+        
+        # Panel de gauche - Liste des modules
+        left_panel = ttk.Frame(self.main_pane)
+        self.main_pane.add(left_panel, weight=1)
+        
+        # Titre section
+        modules_label = ttk.Label(left_panel, text="Main Tools", font=("Arial", 12, "bold"))
+        modules_label.pack(pady=(0, 10))
+        
+        # Creer les boutons pour chaque module
+        for module_key, module_info in self.modules.items():
+            self.create_module_button(left_panel, module_key, module_info)
+        
+        # Bouton refresh
+        ttk.Button(left_panel, text="Refresh Interface", 
+                  command=self.refresh_interface).pack(pady=20)
+        
+        # Message status
+        self.status_label = ttk.Label(left_panel, text="All systems are ready")
+        self.status_label.pack(side=tk.BOTTOM, pady=10)
+    
+    def create_module_button(self, parent, module_key, module_info):
+        """Cree un bouton pour un module."""
+        
+        # Frame pour le module
+        module_frame = ttk.LabelFrame(parent, text=module_info["name"], padding=10)
+        module_frame.pack(fill=tk.X, pady=5)
+        
+        # Status
+        status_label = ttk.Label(module_frame, text="Status: " + module_info["status"])
+        status_label.pack(anchor=tk.W)
+        
+        # Bouton launch
+        launch_btn = ttk.Button(module_frame, text="Launch",
+                               command=lambda mk=module_key: self.launch_module(mk))
+        launch_btn.pack(pady=(5, 0))
+    
+    def launch_module(self, module_key):
+        """Lance un module."""
+        
+        if module_key not in self.modules:
+            print("Module non trouve: " + module_key)
+            return
+        
+        module_info = self.modules[module_key]
+        self.status_label.config(text="Launching " + module_info["name"] + "...")
+        
+        print("Lancement: " + module_info["name"])
+        
+        # Mode de lancement
+        if module_info["launch_mode"] == "integrated":
+            self.launch_integrated(module_key, module_info)
+        else:
+            self.launch_external(module_key, module_info)
+    
+    def launch_integrated(self, module_key, module_info):
+        """Lance un module en mode integre."""
+        
+        try:
+            # Fermer l'interface integree actuelle si elle existe
+            if self.active_integrated_frame:
+                try:
+                    self.active_integrated_frame.destroy()
+                except:
+                    pass
+                self.active_integrated_frame = None
+            
+            # Import dynamique du module AST
+            if "AST" in module_key:
+                script_path = Path(module_info["script"])
+                
+                if not script_path.exists():
+                    self.status_label.config(text="Script non trouve: " + str(script_path))
+                    return
+                
+                # Ajouter le chemin au sys.path
+                module_dir = script_path.parent
+                if str(module_dir) not in sys.path:
+                    sys.path.insert(0, str(module_dir))
+                
+                # Import du module
+                import importlib.util
+                module_name = script_path.stem
+                spec = importlib.util.spec_from_file_location(module_name, script_path)
+                module = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(module)
+                
+                # Creer l'interface AST simple (sans callback)
+                self.active_integrated_frame = module.InterfaceAST(self.main_pane)
+                self.main_pane.add(self.active_integrated_frame, weight=2)
+                
+                self.status_label.config(text="Interface AST active - Version stable")
+            
+            else:
+                # Autres modules (implementation future)
+                self.status_label.config(text="Mode integre non implemente pour ce module")
+        
+        except Exception as e:
+            self.status_label.config(text="Erreur: " + str(e))
+            print("Erreur lancement integre: " + str(e))
+            import traceback
+            traceback.print_exc()
+    
+    def launch_external(self, module_key, module_info):
+        """Lance un module en mode externe."""
+        
+        try:
+            script_path = Path(module_info["script"])
+            
+            if not script_path.exists():
+                self.status_label.config(text="Script non trouve: " + str(script_path))
+                return
+            
+            # Lancement externe
+            subprocess.Popen([sys.executable, str(script_path)], 
+                           cwd=str(script_path.parent))
+            
+            self.status_label.config(text=module_info["name"] + " lance en mode externe")
+        
+        except Exception as e:
+            self.status_label.config(text="Erreur lancement: " + str(e))
+            print("Erreur lancement externe: " + str(e))
+    
+    def refresh_interface(self):
+        """Rafraichit l'interface."""
+        if self.active_integrated_frame:
+            try:
+                self.active_integrated_frame.destroy()
+            except:
+                pass
+            self.active_integrated_frame = None
+        
+        self.status_label.config(text="Interface rafraichie")
+    
+    def run(self):
+        """Lance l'application."""
+        self.root.mainloop()
 
-# Cette condition garantit que le code n'est exécuté qu'une seule fois
-if __name__ in ("__main__", "__mp_main__"):
+def main():
+    """Point d'entree principal."""
+    app = SystemManager()
+    app.run()
+
+if __name__ == "__main__":
     main()

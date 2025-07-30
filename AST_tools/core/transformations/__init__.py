@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
 """
-Package Transformations - Transformations Modulaires
+Module des transformations AST
 """
 
-# Fichier __init__.py propre sans effets de bord
+# Ce fichier reste vide intentionnellement
+# Les transformations sont chargees dynamiquement par TransformationLoader
+pass

@@ -1,0 +1,11 @@
+{
+  "name": "Test Simple",
+  "description": "Plan de test pour diagnostic",
+  "transformations": [
+    {
+      "id": 1,
+      "name": "Test Transform",
+      "plugin_name": "test_plugin"
+    }
+  ]
+}
