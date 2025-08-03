@@ -4,6 +4,19 @@
 AST Tools - Interface PySide6 Complete
 Interface moderne pour la plateforme de refactorisation dirgee par IA
 """
+# Import du logger global pour la derniere execution
+from core.global_logger import log_info, log_error, log_success, log_start, log_end
+import logging
+
+# Demarrage du log de l'execution
+log_start("AST_tools - Nouvelle execution")
+
+# Import du logger global pour la derniere execution
+from core.global_logger import log_info, log_error, log_success, log_start, log_end
+import logging
+
+# Demarrage du log de l'execution
+log_start("AST_tools - Nouvelle execution")
 
 import sys
 import os
@@ -406,7 +419,9 @@ def main():
     app = QApplication(sys.argv)
     window = ASTMainWindow()
     window.show()
-    sys.exit(app.exec())
+    result = app.exec()
+    log_end("AST_tools - Fin execution")
+    sys.exit(result)
 
 if __name__ == "__main__":
     main()

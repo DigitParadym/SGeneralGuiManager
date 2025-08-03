@@ -1,1 +1,0 @@
-"""Tests gui - Projet AST"""

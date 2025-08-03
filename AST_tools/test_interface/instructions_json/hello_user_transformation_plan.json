@@ -1,0 +1,40 @@
+{
+  "transformation_plan": {
+    "name": "hello_user_interactive",
+    "description": "Ajoute interaction utilisateur au script hello world",
+    "target_file": "hello_world.py",
+    "backup_original": true,
+    "dry_run": false
+  },
+  "transformations": [
+    {
+      "step": 1,
+      "type": "add_user_input",
+      "description": "Ajouter demande nom utilisateur",
+      "target_pattern": "if __name__ == \"__main__\":",
+      "insert_after": true,
+      "code_lines": [
+        "    # Demander le nom de l'utilisateur",
+        "    user_name = input(\"Entrez votre nom: \")",
+        ""
+      ]
+    },
+    {
+      "step": 2,
+      "type": "add_personalized_greeting",
+      "description": "Ajouter message personnalise",
+      "target_pattern": "print(\"Hello, World!\")",
+      "insert_after": true,
+      "code_lines": [
+        "    print(\"Hello \" + user_name + \"!\")"
+      ]
+    }
+  ],
+  "expected_result": {
+    "new_variables": [
+      "user_name"
+    ],
+    "new_statements": 3,
+    "interactive": true
+  }
+}

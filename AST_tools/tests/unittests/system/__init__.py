@@ -1,1 +1,0 @@
-"""Tests system - Projet AST"""

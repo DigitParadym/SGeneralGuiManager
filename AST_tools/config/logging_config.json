@@ -1,0 +1,83 @@
+{
+  "version": 1,
+  "disable_existing_loggers": false,
+  "formatters": {
+    "detailed": {
+      "format": "%(asctime)s - %(name)s - %(levelname)s - %(filename)s:%(lineno)d - %(message)s",
+      "datefmt": "%Y-%m-%d %H:%M:%S"
+    },
+    "simple": {
+      "format": "%(levelname)s - %(message)s"
+    },
+    "json": {
+      "format": "%(asctime)s %(name)s %(levelname)s %(message)s",
+      "datefmt": "%Y-%m-%d %H:%M:%S"
+    }
+  },
+  "handlers": {
+    "console": {
+      "class": "logging.StreamHandler",
+      "level": "INFO",
+      "formatter": "simple",
+      "stream": "ext://sys.stdout"
+    },
+    "file_debug": {
+      "class": "logging.FileHandler",
+      "level": "DEBUG",
+      "formatter": "detailed",
+      "filename": "logs/ast_tools_debug.log",
+      "mode": "a",
+      "encoding": "utf-8"
+    },
+    "file_errors": {
+      "class": "logging.FileHandler",
+      "level": "ERROR",
+      "formatter": "detailed",
+      "filename": "logs/ast_tools_errors.log",
+      "mode": "a",
+      "encoding": "utf-8"
+    },
+    "file_transformations": {
+      "class": "logging.FileHandler",
+      "level": "INFO",
+      "formatter": "detailed",
+      "filename": "logs/transformations.log",
+      "mode": "a",
+      "encoding": "utf-8"
+    }
+  },
+  "loggers": {
+    "ast_tools": {
+      "level": "DEBUG",
+      "handlers": [
+        "console",
+        "file_debug",
+        "file_errors"
+      ],
+      "propagate": false
+    },
+    "ast_tools.transformations": {
+      "level": "DEBUG",
+      "handlers": [
+        "console",
+        "file_transformations",
+        "file_errors"
+      ],
+      "propagate": false
+    },
+    "ast_tools.bowler": {
+      "level": "DEBUG",
+      "handlers": [
+        "console",
+        "file_debug"
+      ],
+      "propagate": false
+    }
+  },
+  "root": {
+    "level": "INFO",
+    "handlers": [
+      "console"
+    ]
+  }
+}

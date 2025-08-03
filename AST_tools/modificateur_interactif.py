@@ -1,6 +1,10 @@
 # ===================================================================
 # FICHIER : modificateur_interactif.py (Version complete et corrigee)
 # ===================================================================
+from core.global_logger import log_info, log_error, log_success, log_warning, log_start, log_end
+
+
+from core.global_logger import log_info, log_error, log_success, log_warning, log_start, log_end
 
 import ast
 import os
@@ -95,18 +99,25 @@ class OrchestrateurAST:
     
     def _init_modular_system(self):
         """Initialise le systeme modulaire."""
+    # S'assurer que le repertoire core est accessible
+    import sys
+    from pathlib import Path
+    current_dir = Path(__file__).parent
+    if str(current_dir) not in sys.path:
+        sys.path.insert(0, str(current_dir))
+    
         try:
-            from AST_tools.core.transformation_loader import TransformationLoader
+            from core.transformation_loader import TransformationLoader
             self.transformation_loader = TransformationLoader()
             plugins_info = self.transformation_loader.get_transformation_metadata()
             if plugins_info:
-                print(f"+ Systeme modulaire actif: {len(plugins_info)} transformation(s)")
+                log_success(f"Systeme modulaire actif: {len(plugins_info)} transformation(s)")
             else:
-                print("+ Systeme modulaire actif (aucune transformation dans core/)")
+                log_success("Systeme modulaire actif (aucune transformation dans core/)")
         except ImportError:
-            print("! Systeme modulaire non disponible (dossier core/ manquant)")
+            log_warning("Systeme modulaire non disponible (dossier core/ manquant)")
         except Exception as e:
-            print(f"! Erreur systeme modulaire: {e}")
+            log_warning(f"Erreur systeme modulaire: {e}")
 
     def executer_plan(self, chemin_plan_json: str, fichiers_cibles: List[str]):
         """

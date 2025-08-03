@@ -2,6 +2,7 @@
 """
 TransformationLoader - Version corrigee
 """
+from core.global_logger import log_info, log_error, log_success, log_start, log_end
 
 import os
 import sys

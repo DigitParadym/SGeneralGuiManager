@@ -1,3 +1,0 @@
-# Ceci est la première ligne (en-tête).
-Ceci est la deuxième ligne.
-Ceci est la dernière ligne.

@@ -1,3 +1,5 @@
+from core.global_logger import log_info, log_success, log_error, log_transformation
+
 # -*- coding: utf-8 -*-
 """
 Transformation d'exemple fonctionnelle

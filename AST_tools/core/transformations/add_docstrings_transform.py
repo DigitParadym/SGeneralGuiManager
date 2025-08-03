@@ -18,6 +18,8 @@ if str(current_dir) not in sys.path:
 
 from base_transformer import BaseTransformer
 from core.base_transformer import BaseTransformer
+from core.global_logger import log_info, log_success, log_error, log_transformation
+
 
 class AddDocstringsTransform(BaseTransformer):
     """

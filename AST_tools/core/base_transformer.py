@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+from core.global_logger import log_info, log_error, log_success, log_start, log_end
 
 """
 Interface de Base pour les Transformations Modulaires
