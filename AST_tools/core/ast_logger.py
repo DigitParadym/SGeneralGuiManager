@@ -78,7 +78,9 @@ def log_start(operation_name):
     separator = "=" * 80
     log.info(separator)
     log.info(
-        "DEBUT SESSION AST_TOOLS - {}".format(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+        "DEBUT SESSION AST_TOOLS - {}".format(
+            datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        )
     )
     log.info(separator)
     log.info(f"{str(operation_name)}")

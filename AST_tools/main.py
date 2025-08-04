@@ -1,32 +1,19 @@
 #!/usr/bin/env python3
 """
 AST Tools - Interface PySide6 Complete
-Interface moderne pour la plateforme de refactorisation dirgee par IA
+Interface moderne pour la plateforme de refactorisation dirigee par IA
 """
 
-
-# Demarrage du log de l'execution
-# Import du logger global pour la derniere execution
-from core.global_logger import log_end, log_start
-# Import du logger global pour la derniere execution
-from core.global_logger import log_start
 import json
 import os
 import sys
 import traceback
 from datetime import datetime
 from pathlib import Path
+
 from PySide6.QtCore import Qt, QThread, Signal
 from PySide6.QtGui import QFont
 from PySide6.QtWidgets import (
-
-log_start("AST_tools - Nouvelle execution")
-
-
-# Demarrage du log de l'execution
-log_start("AST_tools - Nouvelle execution")
-
-
     QApplication,
     QFileDialog,
     QFrame,
@@ -47,6 +34,12 @@ log_start("AST_tools - Nouvelle execution")
     QVBoxLayout,
     QWidget,
 )
+
+# Import du logger global pour la derniere execution
+from core.global_logger import log_end, log_start
+
+# Demarrage du log de l'execution
+log_start("AST_tools - Nouvelle execution")
 
 
 # --- Worker pour l'execution en arriere-plan ---

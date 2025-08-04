@@ -144,7 +144,7 @@ class BowlerTransformers:
         if not self.integration.available:
             print(f"Simulation: mise a jour APIs deprecies dans {file_path}")
             for old_api, _new_api in api_mapping.items():
-                print(f"  {old_api} -> {new_api}")
+                print(f"  {old_api} -> {_new_api}")
             return True
 
         success = True
@@ -155,7 +155,9 @@ class BowlerTransformers:
                 return node  # Implementation simplifiee
 
             # Selecteur specifique pour chaque API
-            selector = f"power< '{old_api.replace('.', "' '.")}' any* >"
+            # Compatible Python 3.8+
+            dot_replacement = "' '.'"
+            selector = f"power< '{old_api.replace('.', dot_replacement)}' any* >"
             if not self.integration.transform_file(
                 file_path, selector, api_modifier, dry_run
             ):

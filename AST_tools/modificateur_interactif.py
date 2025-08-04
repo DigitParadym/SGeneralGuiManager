@@ -105,13 +105,11 @@ class OrchestrateurAST:
 
     def _init_modular_system(self):
         """Initialise le systeme modulaire."""
+        from pathlib import Path
 
-    # S'assurer que le repertoire core est accessible
-    from pathlib import Path
-
-    current_dir = Path(__file__).parent
-    if str(current_dir) not in sys.path:
-        sys.path.insert(0, str(current_dir))
+        current_dir = Path(__file__).parent
+        if str(current_dir) not in sys.path:
+            sys.path.insert(0, str(current_dir))
 
         try:
             from core.transformation_loader import TransformationLoader

@@ -74,7 +74,9 @@ def log_start(message):
     # En-tete de session
     logger.info("=" * 80)
     logger.info(
-        "DEBUT SESSION AST_TOOLS - {}".format(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+        "DEBUT SESSION AST_TOOLS - {}".format(
+            datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        )
     )
     logger.info("=" * 80)
     logger.info(message)
@@ -143,7 +145,9 @@ def log_end(message):
     logger.info("-" * 80)
     logger.info(message)
     logger.info(
-        "FIN SESSION AST_TOOLS - {}".format(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+        "FIN SESSION AST_TOOLS - {}".format(
+            datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        )
     )
     logger.info("=" * 80)
     logger.info("")  # Ligne vide finale
@@ -158,9 +162,9 @@ def get_log_file_path():
 def copy_log_for_debug(destination=None):
     """Copie le log actuel pour debug/partage."""
     if destination is None:
-        destination = "ast_tools_debug_{}.log".format(datetime.now().strftime(
-            "%Y%m%d_%H%M%S"
-        ))
+        destination = "ast_tools_debug_{}.log".format(
+            datetime.now().strftime("%Y%m%d_%H%M%S")
+        )
 
     log_path = get_log_file_path()
     if os.path.exists(log_path):

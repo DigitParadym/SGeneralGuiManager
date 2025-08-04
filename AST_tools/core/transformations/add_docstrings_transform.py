@@ -1,21 +1,20 @@
-import ast
-import sys
-from pathlib import Path
-
 #!/usr/bin/env python3
 
 """
 Plugin de Transformation : Ajout de Docstrings Automatique
-Ajoute des docstrings par défaut aux fonctions qui n'en ont pas
+Ajoute des docstrings par defaut aux fonctions qui n'en ont pas
 """
 
+import ast
+import sys
+from pathlib import Path
 
 # Ajouter le chemin pour importer BaseTransformer
 current_dir = Path(__file__).parent.parent
 if str(current_dir) not in sys.path:
     sys.path.insert(0, str(current_dir))
 
-
+from base_transformer import BaseTransformer  # noqa: E402
 
 
 class AddDocstringsTransform(BaseTransformer):

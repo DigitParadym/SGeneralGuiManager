@@ -1,19 +1,8 @@
 import sys
 from pathlib import Path
-from PyQt5.QtWidgets import (
-    QWidget,
-    QVBoxLayout,
-    QHBoxLayout,
-    QPushButton,
-    QTextEdit,
-    QFileDialog,
-    QCheckBox,
-    QLabel,
-    QProgressBar,
-    QGroupBox,
-)
-from PyQt5.QtCore import pyqtSignal
 
+from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtWidgets import (
     QCheckBox,
     QFileDialog,
     QGroupBox,
@@ -114,10 +103,9 @@ class RuffIntegrationTab(QWidget):
 
         # Section des boutons d'action avec reinitialisation
         actions_group = QGroupBox("Actions")
-        QHBoxLayout()
 
         # Premiere ligne de boutons
-        main_# actions_layout removed - unused variable
+        main_actions_layout = QHBoxLayout()
 
         self.analyze_btn = QPushButton("Analyser le Code")
         self.format_btn = QPushButton("Formater le Code")

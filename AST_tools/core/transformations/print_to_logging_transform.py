@@ -1,6 +1,7 @@
+import ast
 import sys
 from pathlib import Path
-import ast
+
 from core.base_transformer import BaseTransformer
 
 #!/usr/bin/env python3
@@ -14,9 +15,6 @@ Convertit tous les appels print() en appels logging.info()
 current_dir = Path(__file__).parent.parent
 if str(current_dir) not in sys.path:
     sys.path.insert(0, str(current_dir))
-
-
-
 
 
 class PrintToLoggingTransform(BaseTransformer):
