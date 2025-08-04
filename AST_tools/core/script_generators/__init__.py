@@ -9,7 +9,7 @@ plutot que de transformer du code existant.
 from .script_to_gui_transform import ScriptToGuiTransform
 
 __all__ = [
-    'ScriptToGuiTransform',
+    "ScriptToGuiTransform",
 ]
 
 __version__ = "1.0.0"

@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Module Core - Système de Transformations AST
 ============================================
@@ -22,15 +21,12 @@ __description__ = "Système modulaire de transformations AST pour Python"
 
 # Imports principaux disponibles depuis le module core
 try:
-    from .transformation_loader import TransformationLoader
     from .base_transformer import BaseTransformer
-    
+    from .transformation_loader import TransformationLoader
+
     # Exports publics
-    __all__ = [
-        'TransformationLoader',
-        'BaseTransformer'
-    ]
-    
+    __all__ = ["TransformationLoader", "BaseTransformer"]
+
 except ImportError as e:
     # En cas d'erreur d'import, on continue sans crash
     print(f"Avertissement core.__init__: {e}")

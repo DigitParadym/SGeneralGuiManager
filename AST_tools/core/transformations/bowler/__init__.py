@@ -7,15 +7,15 @@ automatise de Meta, dans le systeme de transformation AST.
 
 # Imports principaux
 from .bowler_integration import BowlerIntegration
-from .bowler_transformers import BowlerTransformers
 from .bowler_queries import BowlerQueries
+from .bowler_transformers import BowlerTransformers
 from .bowler_utils import BowlerUtils
 
 __all__ = [
-    'BowlerIntegration',
-    'BowlerTransformers', 
-    'BowlerQueries',
-    'BowlerUtils',
+    "BowlerIntegration",
+    "BowlerTransformers",
+    "BowlerQueries",
+    "BowlerUtils",
 ]
 
 __version__ = "1.0.0"
@@ -23,6 +23,7 @@ __version__ = "1.0.0"
 # Verification de la disponibilite de Bowler
 try:
     import bowler
+
     BOWLER_AVAILABLE = True
 except ImportError:
     BOWLER_AVAILABLE = False

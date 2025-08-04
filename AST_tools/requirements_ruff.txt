@@ -1,0 +1,4 @@
+# Dependances Ruff integration
+ruff>=0.1.0
+PyQt5>=5.15.0
+requests>=2.28.0

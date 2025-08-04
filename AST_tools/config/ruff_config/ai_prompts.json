@@ -1,0 +1,8 @@
+{
+  "system_prompt": "Tu es un expert en refactorisation Python.",
+  "ruff_analysis_template": "Analyse ce rapport Ruff et genere un plan de transformation.",
+  "transformation_template": {
+    "name": "Plan auto-genere",
+    "transformations": []
+  }
+}
