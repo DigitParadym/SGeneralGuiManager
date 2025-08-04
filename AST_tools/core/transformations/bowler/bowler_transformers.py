@@ -143,12 +143,12 @@ class BowlerTransformers:
 
         if not self.integration.available:
             print(f"Simulation: mise a jour APIs deprecies dans {file_path}")
-            for old_api, new_api in api_mapping.items():
+            for old_api, _new_api in api_mapping.items():
                 print(f"  {old_api} -> {new_api}")
             return True
 
         success = True
-        for old_api, new_api in api_mapping.items():
+        for old_api, _new_api in api_mapping.items():
 
             def api_modifier(node, capture, filename):
                 """Modificateur pour remplacer l'API deprecie."""

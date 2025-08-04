@@ -48,7 +48,7 @@ class ScriptToGuiTransform:
             return analysis
 
         except SyntaxError as e:
-            raise ValueError(f"Erreur de syntaxe dans {script_path}: {e}")
+            raise ValueError(f"Erreur de syntaxe dans {script_path}: {e}") from e
 
     def _extract_functions(self, tree: ast.AST) -> List[Dict[str, str]]:
         """Extrait les fonctions du script."""

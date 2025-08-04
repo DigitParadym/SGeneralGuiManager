@@ -74,7 +74,7 @@ def log_start(message):
     # En-tete de session
     logger.info("=" * 80)
     logger.info(
-        "DEBUT SESSION AST_TOOLS - %s" % datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        "DEBUT SESSION AST_TOOLS - {}".format(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
     )
     logger.info("=" * 80)
     logger.info(message)
@@ -90,25 +90,25 @@ def log_info(message):
 def log_success(message):
     """Log de succes."""
     logger = _setup_logger()
-    logger.info("SUCCESS: %s" % message)
+    logger.info(f"SUCCESS: {message}")
 
 
 def log_warning(message):
     """Log d'avertissement."""
     logger = _setup_logger()
-    logger.warning("WARNING: %s" % message)
+    logger.warning(f"WARNING: {message}")
 
 
 def log_error(message):
     """Log d'erreur."""
     logger = _setup_logger()
-    logger.error("ERROR: %s" % message)
+    logger.error(f"ERROR: {message}")
 
 
 def log_debug(message):
     """Log de debug (seulement dans le fichier)."""
     logger = _setup_logger()
-    logger.debug("DEBUG: %s" % message)
+    logger.debug(f"DEBUG: {message}")
 
 
 def log_transformation(transformer_name, file_path, success):
@@ -116,8 +116,7 @@ def log_transformation(transformer_name, file_path, success):
     logger = _setup_logger()
     status = "SUCCESS" if success else "FAILED"
     logger.info(
-        "TRANSFORM [%s] %s -> %s"
-        % (status, transformer_name, os.path.basename(file_path))
+        f"TRANSFORM [{status}] {transformer_name} -> {os.path.basename(file_path)}"
     )
 
 
@@ -125,16 +124,16 @@ def log_plugin_load(plugin_name, version, success):
     """Log specialise pour le chargement de plugins."""
     logger = _setup_logger()
     if success:
-        logger.info("PLUGIN LOADED: %s v%s" % (plugin_name, version))
+        logger.info(f"PLUGIN LOADED: {plugin_name} v{version}")
     else:
-        logger.error("PLUGIN FAILED: %s v%s" % (plugin_name, version))
+        logger.error(f"PLUGIN FAILED: {plugin_name} v{version}")
 
 
 def log_file_operation(operation, file_path, success):
     """Log specialise pour les operations fichiers."""
     logger = _setup_logger()
     status = "SUCCESS" if success else "FAILED"
-    logger.info("FILE [%s] %s: %s" % (status, operation, os.path.basename(file_path)))
+    logger.info(f"FILE [{status}] {operation}: {os.path.basename(file_path)}")
 
 
 def log_end(message):
@@ -144,7 +143,7 @@ def log_end(message):
     logger.info("-" * 80)
     logger.info(message)
     logger.info(
-        "FIN SESSION AST_TOOLS - %s" % datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        "FIN SESSION AST_TOOLS - {}".format(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
     )
     logger.info("=" * 80)
     logger.info("")  # Ligne vide finale
@@ -159,14 +158,14 @@ def get_log_file_path():
 def copy_log_for_debug(destination=None):
     """Copie le log actuel pour debug/partage."""
     if destination is None:
-        destination = "ast_tools_debug_%s.log" % datetime.now().strftime(
+        destination = "ast_tools_debug_{}.log".format(datetime.now().strftime(
             "%Y%m%d_%H%M%S"
-        )
+        ))
 
     log_path = get_log_file_path()
     if os.path.exists(log_path):
         shutil.copy2(log_path, destination)
-        log_info("Log copie vers: %s" % destination)
+        log_info(f"Log copie vers: {destination}")
         return destination
     else:
         log_error("Aucun fichier de log a copier")
@@ -186,4 +185,4 @@ if __name__ == "__main__":
     log_file_operation("READ", "test.py", True)
     log_end("Test termine")
 
-    print("Log cree dans: %s" % get_log_file_path())
+    print(f"Log cree dans: {get_log_file_path()}")

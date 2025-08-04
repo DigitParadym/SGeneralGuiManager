@@ -63,39 +63,39 @@ def log_info(message):
 
 
 def log_success(message):
-    log.info("SUCCESS: %s" % str(message))
+    log.info(f"SUCCESS: {str(message)}")
 
 
 def log_warning(message):
-    log.warning("WARNING: %s" % str(message))
+    log.warning(f"WARNING: {str(message)}")
 
 
 def log_error(message, exc_info=False):
-    log.error("ERROR: %s" % str(message), exc_info=exc_info)
+    log.error(f"ERROR: {str(message)}", exc_info=exc_info)
 
 
 def log_start(operation_name):
     separator = "=" * 80
     log.info(separator)
     log.info(
-        "DEBUT SESSION AST_TOOLS - %s" % datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        "DEBUT SESSION AST_TOOLS - {}".format(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
     )
     log.info(separator)
-    log.info("%s" % str(operation_name))
+    log.info(f"{str(operation_name)}")
     log.info("-" * 80)
 
 
 def log_end(operation_name):
     log.info("-" * 80)
-    log.info("FIN: %s" % str(operation_name))
+    log.info(f"FIN: {str(operation_name)}")
     log.info("=" * 80)
 
 
 def log_transformation(transformer_name, filename, success=True, details=""):
     status = "SUCCESS" if success else "FAILED"
-    message = "TRANSFORMATION: %s sur %s - %s" % (transformer_name, filename, status)
+    message = f"TRANSFORMATION: {transformer_name} sur {filename} - {status}"
     if details:
-        message += " - %s" % details
+        message += f" - {details}"
 
     if success:
         log.info(message)
@@ -105,18 +105,18 @@ def log_transformation(transformer_name, filename, success=True, details=""):
 
 def log_plan_info(plan_data, plan_file):
     log.info("=== PLAN DE TRANSFORMATION ===")
-    log.info("Fichier: %s" % plan_file)
-    log.info("Nom: %s" % plan_data.get("name", "N/A"))
-    log.info("Description: %s" % plan_data.get("description", "N/A"))
+    log.info(f"Fichier: {plan_file}")
+    log.info("Nom: {}".format(plan_data.get("name", "N/A")))
+    log.info("Description: {}".format(plan_data.get("description", "N/A")))
     transformations = plan_data.get("transformations", [])
-    log.info("Nombre de transformations: %d" % len(transformations))
+    log.info(f"Nombre de transformations: {len(transformations)}")
     log.info("=" * 50)
 
 
 def log_exception(operation, exception):
     import traceback
 
-    log.error("EXCEPTION pendant %s: %s" % (operation, str(exception)))
+    log.error(f"EXCEPTION pendant {operation}: {str(exception)}")
     log.error("Traceback complet:")
     log.error(traceback.format_exc())
 

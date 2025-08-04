@@ -1,3 +1,7 @@
+import ast
+import sys
+from pathlib import Path
+
 #!/usr/bin/env python3
 
 """
@@ -5,18 +9,13 @@ Plugin de Transformation : Ajout de Docstrings Automatique
 Ajoute des docstrings par défaut aux fonctions qui n'en ont pas
 """
 
-import ast
-import sys
-from pathlib import Path
 
 # Ajouter le chemin pour importer BaseTransformer
 current_dir = Path(__file__).parent.parent
 if str(current_dir) not in sys.path:
     sys.path.insert(0, str(current_dir))
 
-from base_transformer import BaseTransformer
 
-from core.base_transformer import BaseTransformer
 
 
 class AddDocstringsTransform(BaseTransformer):
@@ -128,23 +127,23 @@ class AddDocstringsTransform(BaseTransformer):
         # Générer le docstring approprié
         if func_name == "__init__":
             docstring_text = """Initialise une nouvelle instance.
-            
+
         TODO: Ajouter la description des paramètres et du comportement.
         """
         elif func_name.startswith("test_"):
             docstring_text = f"""Test unitaire pour {func_name[5:]}.
-            
+
         TODO: Décrire ce que teste cette fonction.
         """
         elif func_name in ["__str__", "__repr__"]:
             docstring_text = """Retourne une représentation en chaîne de l'objet.
-            
+
         Returns:
             str: Représentation de l'objet
         """
         elif func_name == "__len__":
             docstring_text = """Retourne la longueur de l'objet.
-            
+
         Returns:
             int: Longueur de l'objet
         """
@@ -154,20 +153,20 @@ class AddDocstringsTransform(BaseTransformer):
 
             if args_info["has_args"]:
                 docstring_text = f"""{func_type.capitalize()} {func_name}.
-                
+
         TODO: Ajouter une description détaillée.
-        
+
         Args:
 {args_info["args_doc"]}
-            
+
         Returns:
             TODO: Décrire la valeur de retour
         """
             else:
                 docstring_text = f"""{func_type.capitalize()} {func_name}.
-                
+
         TODO: Ajouter une description détaillée.
-        
+
         Returns:
             TODO: Décrire la valeur de retour
         """

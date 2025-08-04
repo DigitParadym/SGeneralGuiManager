@@ -1,3 +1,5 @@
+import sys
+from pathlib import Path
 from PyQt5.QtWidgets import (
     QWidget,
     QVBoxLayout,
@@ -10,10 +12,19 @@ from PyQt5.QtWidgets import (
     QProgressBar,
     QGroupBox,
 )
-from PyQt5.QtCore import pyqtSignal, Qt
-from PyQt5.QtGui import QIcon, QFont
-import sys
-from pathlib import Path
+from PyQt5.QtCore import pyqtSignal
+
+    QCheckBox,
+    QFileDialog,
+    QGroupBox,
+    QHBoxLayout,
+    QLabel,
+    QProgressBar,
+    QPushButton,
+    QTextEdit,
+    QVBoxLayout,
+    QWidget,
+)
 
 sys.path.append(str(Path(__file__).parent.parent.parent))
 from core.ruff_integration.ruff_worker import RuffWorker
@@ -103,10 +114,10 @@ class RuffIntegrationTab(QWidget):
 
         # Section des boutons d'action avec reinitialisation
         actions_group = QGroupBox("Actions")
-        actions_layout = QHBoxLayout()
+        QHBoxLayout()
 
         # Premiere ligne de boutons
-        main_actions_layout = QHBoxLayout()
+        main_# actions_layout removed - unused variable
 
         self.analyze_btn = QPushButton("Analyser le Code")
         self.format_btn = QPushButton("Formater le Code")
@@ -448,7 +459,7 @@ class RuffIntegrationTab(QWidget):
 
     def _on_ai_analysis_finished(self, analysis_data):
         """Traite les resultats de l'analyse pour l'IA"""
-        self.results_text.append(f"\n--- Analyse terminee ---")
+        self.results_text.append("\n--- Analyse terminee ---")
         self.results_text.append(
             f"Total des problemes: {analysis_data['total_issues']}"
         )

@@ -8,7 +8,7 @@ pour les transformations AST.
 from typing import Any, Dict, List
 
 try:
-    from bowler import Query
+    # from bowler import Query  # Unused import
 
     BOWLER_AVAILABLE = True
 except ImportError:
@@ -207,7 +207,7 @@ class BowlerQueries:
         for info in self.queries.values():
             categories.add(info.get("category", "general"))
 
-        return sorted(list(categories))
+        return sorted(categories)
 
     def search_queries(self, keyword: str) -> List[Dict[str, Any]]:
         """

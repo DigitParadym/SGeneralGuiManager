@@ -1,11 +1,15 @@
+import sys
+from pathlib import Path
+import ast
+import json
+from core.base_transformer import BaseTransformer
+
 #!/usr/bin/env python3
 """
 Transformation: AI-Powered JSON Transformer
 Applique des transformations basees sur des instructions JSON
 """
 
-import sys
-from pathlib import Path
 
 # S'assurer que le repertoire core est accessible
 current_dir = Path(__file__).parent.parent
@@ -13,10 +17,7 @@ if str(current_dir) not in sys.path:
     sys.path.insert(0, str(current_dir))
 
 
-import ast
-import json
 
-from core.base_transformer import BaseTransformer
 
 
 class JsonAiTransformer(BaseTransformer):
@@ -50,9 +51,9 @@ class JsonAiTransformer(BaseTransformer):
         """Transforme le code selon des instructions JSON"""
         try:
             if isinstance(json_instructions, str):
-                instructions = json.loads(json_instructions)
+                json.loads(json_instructions)
             else:
-                instructions = json_instructions
+                pass
 
             # Traiter les instructions
             # TODO: Implementer selon le format JSON specifique

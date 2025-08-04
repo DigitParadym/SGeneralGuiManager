@@ -1,11 +1,14 @@
+import sys
+from pathlib import Path
+import ast
+from core.base_transformer import BaseTransformer
+
 #!/usr/bin/env python3
 """
 Transformation: Suppression des imports inutilises
 Detecte et supprime les imports qui ne sont pas utilises dans le code
 """
 
-import sys
-from pathlib import Path
 
 # S'assurer que le repertoire core est accessible
 current_dir = Path(__file__).parent.parent
@@ -13,9 +16,7 @@ if str(current_dir) not in sys.path:
     sys.path.insert(0, str(current_dir))
 
 
-import ast
 
-from core.base_transformer import BaseTransformer
 
 
 class UnusedImportRemover(BaseTransformer):

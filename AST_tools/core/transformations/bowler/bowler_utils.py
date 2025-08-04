@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import Any, Dict, List
 
 try:
-    from bowler import Query
+    # from bowler import Query  # Unused import
 
     BOWLER_AVAILABLE = True
 except ImportError:
@@ -364,7 +364,7 @@ class BowlerUtils:
                 by_file_transformer[key] = []
             by_file_transformer[key].append(opp)
 
-        for (file_path, transformer), opps in by_file_transformer.items():
+        for (file_path, transformer), _opps in by_file_transformer.items():
             script_lines.append(f"        (Path('{file_path}'), '{transformer}'),")
 
         script_lines.extend(

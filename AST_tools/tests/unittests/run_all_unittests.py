@@ -44,7 +44,7 @@ def copy_to_clipboard(text):
                     check=True,
                 )
                 return True
-            except:
+            except Exception:
                 subprocess.run(
                     ["xsel", "--clipboard", "--input"],
                     input=text,
@@ -210,7 +210,7 @@ SORTIE COMPLETE DES TESTS:
 RESUME POUR IA:
 - {result.testsRun} tests executes
 - {len(result.failures)} echecs
-- {len(result.errors)} erreurs  
+- {len(result.errors)} erreurs
 - {len(result.skipped)} ignores
 - Taux de reussite: {success_rate:.1f}% si {result.testsRun} > 0 sinon "N/A"
 
@@ -280,7 +280,7 @@ def list_available_tests():
             suite = loader.discover(str(test_file.parent), pattern=test_file.name)
             test_count = suite.countTestCases()
             print(f"    ({test_count} tests)")
-        except:
+        except Exception:
             print("    (erreur chargement)")
 
 
