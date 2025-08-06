@@ -1,8 +1,26 @@
 #!/usr/bin/env python3
 """
 AST Tools - Interface PySide6 Complete
-Interface moderne pour la plateforme de refactorisation dirigee par IA
+Interface moderne pour la plateforme de refactorisation dirgee par IA
 """
+
+# Import du logger global pour la derniere execution
+from core.global_logger import log_end, log_start
+
+# Import pour l'integration Ruff
+try:
+    from gui.tabs.ruff_tab import RuffIntegrationTab
+except ImportError:
+    RuffIntegrationTab = None
+
+# Demarrage du log de l'execution
+log_start("AST_tools - Nouvelle execution")
+
+# Import du logger global pour la derniere execution
+from core.global_logger import log_start
+
+# Demarrage du log de l'execution
+# log_start("AST_tools - Nouvelle execution")  # Dupliqué supprimé
 
 import json
 import os
@@ -34,12 +52,6 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
-
-# Import du logger global pour la derniere execution
-from core.global_logger import log_end, log_start
-
-# Demarrage du log de l'execution
-log_start("AST_tools - Nouvelle execution")
 
 
 # --- Worker pour l'execution en arriere-plan ---
@@ -156,6 +168,16 @@ class ASTMainWindow(QMainWindow):
         self.tab_widget.addTab(main_tab, "Transformations")
         plugins_tab = self.create_plugins_tab()
         self.tab_widget.addTab(plugins_tab, "Plugins")
+
+        # Onglet Ruff Integration
+        if RuffIntegrationTab:
+            try:
+                self.ruff_tab = RuffIntegrationTab()
+                self.tab_widget.addTab(self.ruff_tab, "Analyse & Formatage (Ruff)")
+                self.ruff_tab.ai_plan_ready.connect(self.handle_ai_plan_ready)
+            except Exception as e:
+                self.log_message(f"Module Ruff non disponible: {e}")
+
         logs_tab = self.create_logs_tab()
         self.tab_widget.addTab(logs_tab, "Logs")
         layout.addWidget(self.tab_widget)
@@ -308,9 +330,16 @@ class ASTMainWindow(QMainWindow):
             self.log_message(f"Erreur initialisation: {e}\n{traceback.format_exc()}")
 
     def log_message(self, message):
+        """Log un message avec gestion robuste."""
         timestamp = datetime.now().strftime("%H:%M:%S")
         log_entry = f"[{timestamp}] {message}"
-        self.logs_text.append(log_entry)
+
+        # Verifier que logs_text existe avant de l'utiliser
+        if hasattr(self, "logs_text") and self.logs_text is not None:
+            self.logs_text.append(log_entry)
+        else:
+            # Fallback: imprimer dans la console si logs_text n'existe pas encore
+            print(f"LOG: {log_entry}")
 
     def browse_plan_file(self):
         file_path, _ = QFileDialog.getOpenFileName(
@@ -451,6 +480,17 @@ class ASTMainWindow(QMainWindow):
             self.log_message("Contenu du fichier rafraichi.")
 
     # ... (autres methodes comme refresh_plugins, etc.)
+
+    def handle_ai_plan_ready(self, analysis_data):
+        """Gere les donnees d'analyse Ruff pour generer un plan de transformation"""
+        self.log_message("=" * 50)
+        self.log_message("ANALYSE RUFF POUR IA COMPLETEE")
+        self.log_message(f"Problemes detectes: {analysis_data['total_issues']}")
+
+        if analysis_data["total_issues"] > 0:
+            self.log_message("Donnees pretes pour generation du plan de transformation")
+            # Optionnel : basculer vers l'onglet Transformations
+            self.tab_widget.setCurrentIndex(0)
 
 
 def main():
