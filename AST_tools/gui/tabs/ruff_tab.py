@@ -275,6 +275,29 @@ class RuffIntegrationTab(QWidget):
         self.output_text.setFont(self.font())
         right_layout.addWidget(self.output_text)
 
+        # NOUVEAU: Bouton Copy to clipboard
+        copy_layout = QHBoxLayout()
+        self.copy_btn = QPushButton("Copy to clipboard")
+        self.copy_btn.setToolTip("Copier tous les resultats dans le presse-papiers")
+        self.copy_btn.setStyleSheet('''
+            QPushButton {
+                background-color: #337ab7;
+                color: white;
+                font-weight: bold;
+                padding: 6px;
+            }
+            QPushButton:hover {
+                background-color: #286090;
+            }
+        ''')
+        self.copy_status_label = QLabel("")
+        self.copy_status_label.setStyleSheet("color: green; font-style: italic;")
+        copy_layout.addWidget(self.copy_btn)
+        copy_layout.addWidget(self.copy_status_label)
+        copy_layout.addStretch()
+        right_layout.addLayout(copy_layout)
+
+
         # Statistiques
         self.stats_label = QLabel("Statistiques: -")
         self.stats_label.setStyleSheet("font-weight: bold; padding: 5px;")
@@ -296,6 +319,7 @@ class RuffIntegrationTab(QWidget):
         self.format_btn.clicked.connect(self.run_format)
         self.export_btn.clicked.connect(self.export_results)
         self.cancel_btn.clicked.connect(self.cancel_operation)
+        self.copy_btn.clicked.connect(self.copy_to_clipboard)
 
     def check_ruff_availability(self):
         """Verifie si Ruff est installe."""
@@ -636,3 +660,31 @@ class RuffIntegrationTab(QWidget):
         self.output_text.append(f"[{timestamp}] {message}")
         scrollbar = self.output_text.verticalScrollBar()
         scrollbar.setValue(scrollbar.maximum())
+
+    def copy_to_clipboard(self):
+        '''Copie le contenu des resultats dans le presse-papiers.'''
+        from PySide6.QtWidgets import QApplication
+        from PySide6.QtCore import QTimer
+        from datetime import datetime
+        
+        text_content = self.output_text.toPlainText()
+        
+        if not text_content:
+            self.copy_status_label.setText("Rien a copier")
+            QTimer.singleShot(2000, lambda: self.copy_status_label.setText(""))
+            return
+        
+        header = "=== RESULTATS ANALYSE RUFF ===\n"
+        header += f"Date: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
+        header += f"Nombre de fichiers: {self.files_list.count()}\n"
+        header += "=" * 50 + "\n\n"
+        
+        full_content = header + text_content
+        
+        clipboard = QApplication.clipboard()
+        clipboard.setText(full_content)
+        
+        self.copy_status_label.setText("[OK] Copie dans le presse-papiers!")
+        self.log_message("[COPIE] Resultats copies dans le presse-papiers")
+        
+        QTimer.singleShot(3000, lambda: self.copy_status_label.setText(""))

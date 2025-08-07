@@ -1,251 +1,230 @@
 #!/usr/bin/env python3
 """
-Script de nettoyage du projet AST_tools
-Supprime tous les fichiers non necessaires et temporaires
+Script pour ajouter automatiquement le bouton Copy to clipboard dans ruff_tab.py
 """
 
 import os
-import shutil
 from pathlib import Path
 
 
-def get_size_format(bytes):
-    """Formate la taille en bytes de maniere lisible."""
-    for unit in ['B', 'KB', 'MB', 'GB']:
-        if bytes < 1024.0:
-            return f"{bytes:.1f} {unit}"
-        bytes /= 1024.0
-    return f"{bytes:.1f} TB"
-
-
-def calculate_size(path):
-    """Calcule la taille d'un fichier ou dossier."""
-    total = 0
-    if os.path.isfile(path):
-        total = os.path.getsize(path)
-    elif os.path.isdir(path):
-        for dirpath, _, filenames in os.walk(path):
-            for f in filenames:
-                fp = os.path.join(dirpath, f)
-                if os.path.exists(fp):
-                    total += os.path.getsize(fp)
-    return total
-
-
-def cleanup_project():
-    """Nettoie le projet en supprimant les fichiers non necessaires."""
+def add_copy_button():
+    """Ajoute automatiquement le bouton Copy to clipboard."""
+    
+    file_path = Path("gui/tabs/ruff_tab.py")
+    
+    if not file_path.exists():
+        print("[X] Erreur: gui/tabs/ruff_tab.py non trouve!")
+        return False
     
     print("=" * 60)
-    print("NETTOYAGE DU PROJET AST_TOOLS")
+    print("AJOUT AUTOMATIQUE DU BOUTON COPY TO CLIPBOARD")
     print("=" * 60)
     
-    # Liste des elements a supprimer
-    to_delete = {
-        # === DOSSIERS A SUPPRIMER ===
-        "dirs": [
-            ".ruff_cache",           # Cache Ruff (peut etre regenere)
-            "__pycache__",           # Cache Python
-            ".pytest_cache",         # Cache pytest si present
-            "logs/ruff",            # Logs Ruff temporaires
-            "data/ruff_reports/cache",  # Cache des rapports
-        ],
+    # Lire le fichier
+    with open(file_path, 'r', encoding='utf-8') as f:
+        lines = f.readlines()
+    
+    print(f"[i] Fichier charge: {len(lines)} lignes")
+    
+    # === 1. TROUVER ET AJOUTER LE BOUTON DANS LE PANNEAU DROIT ===
+    print("\n[1] Ajout du bouton dans le panneau droit...")
+    
+    # Chercher l'endroit ou ajouter le bouton (apres self.output_text)
+    insert_position = None
+    for i, line in enumerate(lines):
+        if "right_layout.addWidget(self.output_text)" in line:
+            insert_position = i + 1
+            print(f"    Position trouvee: ligne {i+1}")
+            break
+    
+    if insert_position:
+        # Code a inserer pour le bouton
+        button_code = """
+        # NOUVEAU: Bouton Copy to clipboard
+        copy_layout = QHBoxLayout()
+        self.copy_btn = QPushButton("Copy to clipboard")
+        self.copy_btn.setToolTip("Copier tous les resultats dans le presse-papiers")
+        self.copy_btn.setStyleSheet('''
+            QPushButton {
+                background-color: #337ab7;
+                color: white;
+                font-weight: bold;
+                padding: 6px;
+            }
+            QPushButton:hover {
+                background-color: #286090;
+            }
+        ''')
+        self.copy_status_label = QLabel("")
+        self.copy_status_label.setStyleSheet("color: green; font-style: italic;")
+        copy_layout.addWidget(self.copy_btn)
+        copy_layout.addWidget(self.copy_status_label)
+        copy_layout.addStretch()
+        right_layout.addLayout(copy_layout)
+
+"""
+        lines.insert(insert_position, button_code)
+        print("    [OK] Code du bouton insere")
+    else:
+        print("    [X] Position non trouvee pour le bouton")
+        return False
+    
+    # === 2. AJOUTER LA CONNEXION DU SIGNAL ===
+    print("\n[2] Ajout de la connexion du signal...")
+    
+    # Chercher la section des connexions
+    connection_position = None
+    for i, line in enumerate(lines):
+        if "self.cancel_btn.clicked.connect(self.cancel_operation)" in line:
+            connection_position = i + 1
+            print(f"    Position trouvee: ligne {i+1}")
+            break
+    
+    if connection_position:
+        connection_code = "        self.copy_btn.clicked.connect(self.copy_to_clipboard)\n"
+        lines.insert(connection_position, connection_code)
+        print("    [OK] Connexion ajoutee")
+    else:
+        print("    [X] Position non trouvee pour la connexion")
+    
+    # === 3. AJOUTER LA METHODE copy_to_clipboard ===
+    print("\n[3] Ajout de la methode copy_to_clipboard...")
+    
+    # Trouver la fin de la classe (avant le dernier def ou a la fin)
+    method_position = None
+    for i in range(len(lines) - 1, -1, -1):
+        if lines[i].strip().startswith("def log_message"):
+            # Trouver la fin de cette methode
+            indent_count = len(lines[i]) - len(lines[i].lstrip())
+            for j in range(i + 1, len(lines)):
+                if j == len(lines) - 1:  # Derniere ligne
+                    method_position = j + 1
+                    break
+                elif lines[j].strip() and not lines[j].startswith(" " * (indent_count + 4)):
+                    method_position = j
+                    break
+            break
+    
+    if method_position is None:
+        method_position = len(lines)  # Ajouter a la fin si pas trouve
+    
+    print(f"    Position trouvee: ligne {method_position}")
+    
+    # Code de la methode
+    method_code = """
+    def copy_to_clipboard(self):
+        '''Copie le contenu des resultats dans le presse-papiers.'''
+        from PySide6.QtWidgets import QApplication
+        from PySide6.QtCore import QTimer
+        from datetime import datetime
         
-        # === FICHIERS TEMPORAIRES A SUPPRIMER ===
-        "files": [
-            # Fichiers de diagnostic/reparation anciens
-            "diagnostic_report_20250805_214017.json",
-            "repair_report_20250805_214316.txt",
-            "ruff_diagnostic_20250805_180737.txt",
-            "ast_tools_debug_20250802_162356.log",
-            
-            # Fichiers de reparation temporaires
-            "auto_repair.py",
-            
-            # Logs precedents (on garde seulement le log actuel)
-            "ast_tools_previous.log",
-            
-            # Fichiers de vision/documentation temporaire
-            "AST_Vision_Global.txt",
-        ],
+        text_content = self.output_text.toPlainText()
         
-        # === PATTERNS DE FICHIERS A SUPPRIMER ===
-        "patterns": [
-            "*.pyc",                 # Fichiers Python compiles
-            "*.pyo",                 # Fichiers Python optimises
-            "*.pyd",                 # Extensions Python Windows
-            "*~",                    # Fichiers temporaires editeur
-            ".DS_Store",             # Fichiers macOS
-            "Thumbs.db",             # Fichiers Windows
-            "*.backup*",             # Tous les fichiers backup
-            "*.bak",                 # Fichiers backup
-            "*_old.py",              # Anciennes versions
-            "*_backup.py",           # Backups Python
-        ]
-    }
+        if not text_content:
+            self.copy_status_label.setText("Rien a copier")
+            QTimer.singleShot(2000, lambda: self.copy_status_label.setText(""))
+            return
+        
+        header = "=== RESULTATS ANALYSE RUFF ===\\n"
+        header += f"Date: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\\n"
+        header += f"Nombre de fichiers: {self.files_list.count()}\\n"
+        header += "=" * 50 + "\\n\\n"
+        
+        full_content = header + text_content
+        
+        clipboard = QApplication.clipboard()
+        clipboard.setText(full_content)
+        
+        self.copy_status_label.setText("[OK] Copie dans le presse-papiers!")
+        self.log_message("[COPIE] Resultats copies dans le presse-papiers")
+        
+        QTimer.singleShot(3000, lambda: self.copy_status_label.setText(""))
+"""
     
-    # Statistiques
-    total_size = 0
-    deleted_items = []
+    lines.insert(method_position, method_code)
+    print("    [OK] Methode ajoutee")
     
-    print("\n[1] ANALYSE DES FICHIERS A SUPPRIMER...")
-    print("-" * 40)
+    # === 4. SAUVEGARDER LE FICHIER ===
+    print("\n[4] Sauvegarde du fichier...")
     
-    # === SUPPRESSION DES DOSSIERS ===
-    for dir_path in to_delete["dirs"]:
-        if os.path.exists(dir_path) and os.path.isdir(dir_path):
-            size = calculate_size(dir_path)
-            total_size += size
-            print(f"  Dossier: {dir_path} ({get_size_format(size)})")
-            deleted_items.append(("dir", dir_path, size))
+    # Backup du fichier original
+    backup_path = file_path.with_suffix('.py.backup_before_copy_button')
+    with open(backup_path, 'w', encoding='utf-8') as f:
+        with open(file_path, 'r', encoding='utf-8') as original:
+            f.write(original.read())
+    print(f"    [OK] Backup cree: {backup_path}")
     
-    # === SUPPRESSION DES FICHIERS SPECIFIQUES ===
-    for file_path in to_delete["files"]:
-        if os.path.exists(file_path) and os.path.isfile(file_path):
-            size = os.path.getsize(file_path)
-            total_size += size
-            print(f"  Fichier: {file_path} ({get_size_format(size)})")
-            deleted_items.append(("file", file_path, size))
+    # Ecrire le fichier modifie
+    with open(file_path, 'w', encoding='utf-8') as f:
+        f.writelines(lines)
     
-    # === RECHERCHE PAR PATTERNS ===
-    for pattern in to_delete["patterns"]:
-        for path in Path(".").rglob(pattern):
-            if path.is_file():
-                size = path.stat().st_size
-                total_size += size
-                print(f"  Pattern: {path} ({get_size_format(size)})")
-                deleted_items.append(("file", str(path), size))
+    print(f"    [OK] Fichier modifie sauvegarde")
     
-    # === RECHERCHE DES DOSSIERS __pycache__ PARTOUT ===
-    for pycache in Path(".").rglob("__pycache__"):
-        if pycache.is_dir():
-            size = calculate_size(str(pycache))
-            total_size += size
-            print(f"  PyCache: {pycache} ({get_size_format(size)})")
-            deleted_items.append(("dir", str(pycache), size))
-    
-    if not deleted_items:
-        print("\n[OK] Aucun fichier temporaire a supprimer!")
-        print("     Le projet est deja propre.")
-        return
-    
-    # === RESUME ===
-    print("\n" + "=" * 60)
-    print("RESUME")
-    print("=" * 60)
-    print(f"Elements a supprimer: {len(deleted_items)}")
-    print(f"Espace a liberer: {get_size_format(total_size)}")
-    
-    # === CONFIRMATION ===
-    print("\n" + "=" * 60)
-    print("[!] ATTENTION: Cette action est IRREVERSIBLE!")
-    print("=" * 60)
-    response = input("\nVoulez-vous vraiment supprimer ces fichiers? (yes/no): ").strip().lower()
-    
-    if response not in ['yes', 'y', 'oui', 'o']:
-        print("\n[ANNULE] Aucun fichier supprime.")
-        return
-    
-    # === SUPPRESSION EFFECTIVE ===
-    print("\n[2] SUPPRESSION EN COURS...")
-    print("-" * 40)
-    
-    success_count = 0
-    error_count = 0
-    
-    for item_type, item_path, _ in deleted_items:
-        try:
-            if item_type == "dir":
-                shutil.rmtree(item_path)
-                print(f"  [OK] Dossier supprime: {item_path}")
-            else:
-                os.remove(item_path)
-                print(f"  [OK] Fichier supprime: {item_path}")
-            success_count += 1
-        except Exception as e:
-            print(f"  [X] Erreur: {item_path} - {str(e)}")
-            error_count += 1
-    
-    # === RAPPORT FINAL ===
-    print("\n" + "=" * 60)
-    print("NETTOYAGE TERMINE")
-    print("=" * 60)
-    print(f"[OK] {success_count} element(s) supprime(s)")
-    if error_count > 0:
-        print(f"[X] {error_count} erreur(s)")
-    print(f"[i] Espace libere: {get_size_format(total_size)}")
-    
-    # === CONSEILS POST-NETTOYAGE ===
-    print("\n" + "=" * 60)
-    print("PROCHAINES ETAPES RECOMMANDEES")
-    print("=" * 60)
-    print("1. Verifier que l'application fonctionne: python run.py")
-    print("2. Faire un commit Git: git add . && git commit -m 'cleanup: suppression fichiers temporaires'")
-    print("3. Relancer Ruff pour verifier: ruff check .")
+    return True
 
 
-def list_files_only():
-    """Liste les fichiers qui seraient supprimes sans les supprimer."""
+def verify_installation():
+    """Verifie que le bouton a bien ete ajoute."""
     
+    print("\n" + "=" * 60)
+    print("VERIFICATION DE L'INSTALLATION")
     print("=" * 60)
-    print("MODE PREVIEW - AUCUNE SUPPRESSION")
-    print("=" * 60)
     
-    # Meme logique mais sans suppression
-    to_check = {
-        "dirs": [".ruff_cache", "__pycache__", ".pytest_cache", "logs/ruff", "data/ruff_reports/cache"],
-        "files": [
-            "diagnostic_report_20250805_214017.json",
-            "repair_report_20250805_214316.txt",
-            "ruff_diagnostic_20250805_180737.txt",
-            "ast_tools_debug_20250802_162356.log",
-            "auto_repair.py",
-            "ast_tools_previous.log",
-            "AST_Vision_Global.txt",
-        ],
-        "patterns": ["*.pyc", "*.pyo", "*.pyd", "*~", ".DS_Store", "Thumbs.db", "*.backup*", "*.bak"]
-    }
+    file_path = Path("gui/tabs/ruff_tab.py")
     
-    total_size = 0
-    count = 0
+    with open(file_path, 'r', encoding='utf-8') as f:
+        content = f.read()
     
-    print("\nFichiers/Dossiers qui seraient supprimes:")
-    print("-" * 40)
+    checks = [
+        ("Bouton declare", "self.copy_btn = QPushButton"),
+        ("Layout cree", "copy_layout = QHBoxLayout()"),
+        ("Signal connecte", "self.copy_btn.clicked.connect"),
+        ("Methode presente", "def copy_to_clipboard(self):"),
+    ]
     
-    for dir_path in to_check["dirs"]:
-        if os.path.exists(dir_path) and os.path.isdir(dir_path):
-            size = calculate_size(dir_path)
-            total_size += size
-            count += 1
-            print(f"  [D] {dir_path} ({get_size_format(size)})")
+    all_ok = True
+    for check_name, pattern in checks:
+        if pattern in content:
+            print(f"[OK] {check_name}")
+        else:
+            print(f"[X] {check_name} - NON TROUVE")
+            all_ok = False
     
-    for file_path in to_check["files"]:
-        if os.path.exists(file_path) and os.path.isfile(file_path):
-            size = os.path.getsize(file_path)
-            total_size += size
-            count += 1
-            print(f"  [F] {file_path} ({get_size_format(size)})")
-    
-    print(f"\nTotal: {count} elements, {get_size_format(total_size)}")
+    return all_ok
 
 
 def main():
-    """Point d'entree principal."""
+    """Fonction principale."""
     
-    print("SCRIPT DE NETTOYAGE AST_TOOLS")
+    print("INSTALLATION DU BOUTON COPY TO CLIPBOARD")
     print("=" * 60)
-    print("Options:")
-    print("  1. Nettoyer le projet (suppression)")
-    print("  2. Preview (voir sans supprimer)")
-    print("  3. Annuler")
     
-    choice = input("\nChoix (1/2/3): ").strip()
+    response = input("\nVoulez-vous installer le bouton automatiquement? (yes/no): ").strip().lower()
     
-    if choice == "1":
-        cleanup_project()
-    elif choice == "2":
-        list_files_only()
+    if response not in ['yes', 'y', 'oui', 'o']:
+        print("\n[ANNULE] Aucune modification effectuee")
+        return
+    
+    # Ajouter le bouton
+    if add_copy_button():
+        print("\n" + "=" * 60)
+        print("[OK] INSTALLATION TERMINEE AVEC SUCCES!")
+        print("=" * 60)
+        
+        # Verifier
+        if verify_installation():
+            print("\n[OK] Tous les elements ont ete correctement ajoutes!")
+            print("\nPROCHAINES ETAPES:")
+            print("1. Fermer l'application si elle est ouverte")
+            print("2. Relancer avec: python run.py")
+            print("3. Aller dans l'onglet 'Analyse et Formatage (Ruff)'")
+            print("4. Le bouton 'Copy to clipboard' sera visible!")
+        else:
+            print("\n[!] Certains elements semblent manquer")
+            print("    Verifiez manuellement le fichier")
     else:
-        print("\n[ANNULE] Aucune action effectuee.")
+        print("\n[X] Erreur lors de l'installation")
+        print("    Verifiez le fichier manuellement")
 
 
 if __name__ == "__main__":
