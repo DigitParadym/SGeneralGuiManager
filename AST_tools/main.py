@@ -4,24 +4,7 @@ AST Tools - Interface PySide6 Complete
 Interface moderne pour la plateforme de refactorisation dirgee par IA
 """
 
-# Import du logger global pour la derniere execution
-from core.global_logger import log_end, log_start
-
-# Import pour l'integration Ruff
-try:
-    from gui.tabs.ruff_tab import RuffIntegrationTab
-except ImportError:
-    RuffIntegrationTab = None
-
-# Demarrage du log de l'execution
-log_start("AST_tools - Nouvelle execution")
-
-# Import du logger global pour la derniere execution
-from core.global_logger import log_start
-
-# Demarrage du log de l'execution
-# log_start("AST_tools - Nouvelle execution")  # Dupliqué supprimé
-
+# Imports standards
 import json
 import os
 import sys
@@ -29,6 +12,7 @@ import traceback
 from datetime import datetime
 from pathlib import Path
 
+# Imports PySide6
 from PySide6.QtCore import Qt, QThread, Signal
 from PySide6.QtGui import QFont
 from PySide6.QtWidgets import (
@@ -53,8 +37,19 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+# Import du logger global
+from core.global_logger import log_end, log_start
 
-# --- Worker pour l'execution en arriere-plan ---
+# Import pour l'integration Ruff
+try:
+    from gui.tabs.ruff_tab import RuffIntegrationTab
+except ImportError:
+    RuffIntegrationTab = None
+
+# Demarrage du log de l'execution
+log_start("AST_tools - Nouvelle execution")
+
+
 class TransformationWorker(QThread):
     progress_update = Signal(int, str)  # Pourcentage, nom du fichier
     log_message = Signal(str)
