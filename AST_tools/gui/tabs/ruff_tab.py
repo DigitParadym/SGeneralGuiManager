@@ -118,6 +118,81 @@ class RuffWorker(QThread):
         self.finished.emit(results)
 
 
+class MypyWorker(QThread):
+    """Worker pour executer mypy en arriere-plan."""
+
+    progress = Signal(str)
+    finished = Signal(dict)
+    file_progress = Signal(int, int)
+
+    def __init__(self, files, strict_mode=False):
+        super().__init__()
+        self.files = files
+        self.strict_mode = strict_mode
+
+    def run(self):
+        """Execute mypy sur les fichiers."""
+        results = {
+            "files": [],
+            "total_errors": 0,
+            "total_warnings": 0,
+            "total_notes": 0,
+        }
+        total_files = len(self.files)
+
+        for index, file in enumerate(self.files, 1):
+            self.file_progress.emit(index, total_files)
+            self.progress.emit(
+                f"Verification des types de {os.path.basename(file)}... ({index}/{total_files})"
+            )
+
+            try:
+                cmd = [
+                    "mypy",
+                    "--no-error-summary",
+                    "--show-column-numbers",
+                    "--no-pretty",
+                    "--show-error-codes",
+                ]
+
+                if self.strict_mode:
+                    cmd.append("--strict")
+
+                cmd.append(file)
+
+                result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+
+                file_result = {
+                    "file": file,
+                    "output": result.stdout,
+                    "errors": result.stderr,
+                    "return_code": result.returncode,
+                }
+
+                lines = result.stdout.split("\n")
+                for line in lines:
+                    if ": error:" in line:
+                        results["total_errors"] += 1
+                    elif ": warning:" in line:
+                        results["total_warnings"] += 1
+                    elif ": note:" in line:
+                        results["total_notes"] += 1
+
+                results["files"].append(file_result)
+
+            except subprocess.TimeoutExpired:
+                results["files"].append({"file": file, "error": "Timeout (>30s)"})
+            except FileNotFoundError:
+                self.progress.emit(
+                    "[X] mypy non installe. Installez avec: pip install mypy"
+                )
+                break
+            except Exception as e:
+                results["files"].append({"file": file, "error": str(e)})
+
+        self.finished.emit(results)
+
+
 class RuffIntegrationTab(QWidget):
     """Onglet d'integration Ruff avec selection recursive et auto-fix."""
 
@@ -128,7 +203,7 @@ class RuffIntegrationTab(QWidget):
         self.last_analysis_data = {}
         self.current_worker = None
         self.setup_ui()
-        self.check_ruff_availability()
+        self.check_tools_availability()
 
     def setup_ui(self):
         """Cree l'interface utilisateur amelioree."""
@@ -244,6 +319,44 @@ class RuffIntegrationTab(QWidget):
         left_layout.addWidget(self.check_btn)
         left_layout.addWidget(self.check_fix_btn)  # NOUVEAU bouton
         left_layout.addWidget(self.format_btn)
+
+        # === SECTION MYPY (AJOUT AUTOMATIQUE) ===
+        mypy_label = QLabel("mypy (Verification de Types):")
+        mypy_label.setStyleSheet("font-weight: bold; margin-top: 10px;")
+        left_layout.addWidget(mypy_label)
+
+        # Bouton Mypy normal
+        self.mypy_btn = QPushButton("Verifier les Types (mypy)")
+        self.mypy_btn.setToolTip("Lancer l'analyse des types avec mypy")
+        self.mypy_btn.setStyleSheet("""
+            QPushButton {
+                padding: 8px;
+                font-weight: bold;
+                background-color: #0078d4;
+                color: white;
+            }
+            QPushButton:hover {
+                background-color: #106ebe;
+            }
+        """)
+        left_layout.addWidget(self.mypy_btn)
+
+        # Bouton Mypy strict
+        self.mypy_strict_btn = QPushButton("Verifier (mode strict)")
+        self.mypy_strict_btn.setToolTip("Lancer mypy en mode strict")
+        self.mypy_strict_btn.setStyleSheet("""
+            QPushButton {
+                padding: 8px;
+                font-weight: bold;
+                background-color: #d9534f;
+                color: white;
+            }
+            QPushButton:hover {
+                background-color: #c9302c;
+            }
+        """)
+        left_layout.addWidget(self.mypy_strict_btn)
+
         left_layout.addWidget(self.export_btn)
 
         # Progress bar
@@ -279,7 +392,7 @@ class RuffIntegrationTab(QWidget):
         copy_layout = QHBoxLayout()
         self.copy_btn = QPushButton("Copy to clipboard")
         self.copy_btn.setToolTip("Copier tous les resultats dans le presse-papiers")
-        self.copy_btn.setStyleSheet('''
+        self.copy_btn.setStyleSheet("""
             QPushButton {
                 background-color: #337ab7;
                 color: white;
@@ -289,14 +402,13 @@ class RuffIntegrationTab(QWidget):
             QPushButton:hover {
                 background-color: #286090;
             }
-        ''')
+        """)
         self.copy_status_label = QLabel("")
         self.copy_status_label.setStyleSheet("color: green; font-style: italic;")
         copy_layout.addWidget(self.copy_btn)
         copy_layout.addWidget(self.copy_status_label)
         copy_layout.addStretch()
         right_layout.addLayout(copy_layout)
-
 
         # Statistiques
         self.stats_label = QLabel("Statistiques: -")
@@ -319,9 +431,11 @@ class RuffIntegrationTab(QWidget):
         self.format_btn.clicked.connect(self.run_format)
         self.export_btn.clicked.connect(self.export_results)
         self.cancel_btn.clicked.connect(self.cancel_operation)
+        self.mypy_btn.clicked.connect(self.run_mypy)
+        self.mypy_strict_btn.clicked.connect(self.run_mypy_strict)
         self.copy_btn.clicked.connect(self.copy_to_clipboard)
 
-    def check_ruff_availability(self):
+    def check_tools_availability(self):
         """Verifie si Ruff est installe."""
         try:
             result = subprocess.run(
@@ -429,6 +543,8 @@ class RuffIntegrationTab(QWidget):
         self.check_btn.setEnabled(has_files)
         self.check_fix_btn.setEnabled(has_files)
         self.format_btn.setEnabled(has_files)
+        self.mypy_btn.setEnabled(has_files)
+        self.mypy_strict_btn.setEnabled(has_files)
 
     def clear_files(self):
         """Vide la liste des fichiers."""
@@ -532,6 +648,8 @@ class RuffIntegrationTab(QWidget):
         self.check_btn.setEnabled(not show)
         self.check_fix_btn.setEnabled(not show)
         self.format_btn.setEnabled(not show)
+        self.mypy_btn.setEnabled(not show)
+        self.mypy_strict_btn.setEnabled(not show)
         self.add_files_btn.setEnabled(not show)
         self.add_folder_btn.setEnabled(not show)
 
@@ -662,29 +780,111 @@ class RuffIntegrationTab(QWidget):
         scrollbar.setValue(scrollbar.maximum())
 
     def copy_to_clipboard(self):
-        '''Copie le contenu des resultats dans le presse-papiers.'''
+        """Copie le contenu des resultats dans le presse-papiers."""
         from PySide6.QtWidgets import QApplication
         from PySide6.QtCore import QTimer
         from datetime import datetime
-        
+
         text_content = self.output_text.toPlainText()
-        
+
         if not text_content:
             self.copy_status_label.setText("Rien a copier")
             QTimer.singleShot(2000, lambda: self.copy_status_label.setText(""))
             return
-        
+
         header = "=== RESULTATS ANALYSE RUFF ===\n"
         header += f"Date: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
         header += f"Nombre de fichiers: {self.files_list.count()}\n"
         header += "=" * 50 + "\n\n"
-        
+
         full_content = header + text_content
-        
+
         clipboard = QApplication.clipboard()
         clipboard.setText(full_content)
-        
+
         self.copy_status_label.setText("[OK] Copie dans le presse-papiers!")
         self.log_message("[COPIE] Resultats copies dans le presse-papiers")
-        
+
         QTimer.singleShot(3000, lambda: self.copy_status_label.setText(""))
+
+        # Verification mypy (AJOUT AUTOMATIQUE)
+        try:
+            result = subprocess.run(
+                ["mypy", "--version"], capture_output=True, text=True
+            )
+            self.log_message(f"[OK] Mypy disponible: {result.stdout.strip()}")
+            self.mypy_btn.setEnabled(True)
+            self.mypy_strict_btn.setEnabled(True)
+        except (FileNotFoundError, subprocess.SubprocessError):
+            self.log_message("[X] Mypy non installe. Installez avec: pip install mypy")
+            self.mypy_btn.setEnabled(False)
+            self.mypy_strict_btn.setEnabled(False)
+
+    def run_mypy(self):
+        """Lance l'analyse de types avec mypy."""
+        files = self.get_selected_files()
+        if not files:
+            self.log_message("[!] Aucun fichier a analyser")
+            return
+
+        self.show_progress(True)
+        self.log_message(f"Demarrage de l'analyse mypy sur {len(files)} fichier(s)...")
+        self.log_message("[INFO] Mode: Verification de types standard")
+
+        self.current_worker = MypyWorker(files, strict_mode=False)
+        self.current_worker.progress.connect(self.log_message)
+        self.current_worker.file_progress.connect(self.update_progress)
+        self.current_worker.finished.connect(self.on_mypy_finished)
+        self.current_worker.start()
+
+    def run_mypy_strict(self):
+        """Lance l'analyse de types avec mypy en mode strict."""
+        files = self.get_selected_files()
+        if not files:
+            self.log_message("[!] Aucun fichier a analyser")
+            return
+
+        self.show_progress(True)
+        self.log_message(
+            f"Demarrage de l'analyse mypy STRICT sur {len(files)} fichier(s)..."
+        )
+        self.log_message("[INFO] Mode: Verification de types STRICT")
+
+        self.current_worker = MypyWorker(files, strict_mode=True)
+        self.current_worker.progress.connect(self.log_message)
+        self.current_worker.file_progress.connect(self.update_progress)
+        self.current_worker.finished.connect(self.on_mypy_finished)
+        self.current_worker.start()
+
+    def on_mypy_finished(self, results):
+        """Traite les resultats de l'analyse mypy."""
+        self.show_progress(False)
+
+        self.last_analysis_data["mypy_results"] = {
+            "timestamp": datetime.now().isoformat(),
+            "tool": "mypy",
+            "total_errors": results["total_errors"],
+            "total_warnings": results["total_warnings"],
+            "total_notes": results["total_notes"],
+            "files_analyzed": len(results["files"]),
+            "results": results,
+        }
+
+        self.log_message(f"\n{'=' * 50}")
+        self.log_message(f"VERIFICATION DES TYPES TERMINEE (mypy)")
+        self.log_message(f"Fichiers analyses: {len(results['files'])}")
+        self.log_message(f"Erreurs de types: {results['total_errors']}")
+        self.log_message(f"Avertissements: {results['total_warnings']}")
+        self.log_message(f"Notes: {results['total_notes']}")
+
+        for file_result in results["files"]:
+            if file_result.get("output"):
+                self.log_message(f"\n--- {os.path.basename(file_result['file'])} ---")
+                for line in file_result["output"].split("\n"):
+                    if line.strip():
+                        self.log_message(f"  {line}")
+
+        self.stats_label.setText(
+            f"Mypy: {results['total_errors']} erreur(s), "
+            f"{results['total_warnings']} avertissement(s)"
+        )
