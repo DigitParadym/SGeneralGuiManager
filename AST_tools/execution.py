@@ -1,271 +1,379 @@
 #!/usr/bin/env python3
 """
-Script de nettoyage du projet AST Tools
-1. Sauvegarde Git de l'etat actuel
-2. Supprime les fichiers .py non necessaires
-3. Prepare le projet pour les nouveaux plugins
+Script de nettoyage du projet AST_tools avant commit Git
+Supprime les fichiers temporaires, backups et autres fichiers non necessaires
 """
 
 import os
-import subprocess
 import shutil
 from pathlib import Path
-from datetime import datetime
+from typing import List, Set
+import sys
 
-class NettoyeurProjet:
-    def __init__(self):
-        self.projet_path = Path(".")
-        self.core_path = Path("core")
-        
-        # Fichiers essentiels a conserver
-        self.fichiers_essentiels = {
-            # Fichiers principaux
-            "AST.py",
-            "main.py", 
-            "modificateur_interactif.py",
-            "execution.py",
-            "__init__.py",
-            
-            # Fichiers core essentiels
-            "core/base_transformer.py",
-            "core/models.py",
-            "core/global_logger.py", 
-            "core/transformation_loader.py",
-            "core/ast_logger.py",
-            "core/__init__.py"
-        }
+class ProjectCleaner:
+    def __init__(self, project_root: Path = None):
+        self.project_root = project_root or Path.cwd()
+        self.files_to_delete = []
+        self.dirs_to_delete = []
         
         # Patterns de fichiers a supprimer
-        self.patterns_a_supprimer = [
-            "*_backup_*.py",           # Sauvegardes automatiques
-            "fix_*.py",                # Scripts de correction
-            "diagnostic_*.py",         # Scripts de diagnostic  
-            "creer_*.py",             # Scripts de creation
-            "nettoyage_*.py",         # Scripts de nettoyage
-            "test_*.py",              # Fichiers de test temporaires
-            "temp_*.py",              # Fichiers temporaires
-            "*.tmp",                   # Fichiers temporaires
-            "*.bak",                   # Sauvegardes
-            "__pycache__/*",          # Cache Python
-            "*.pyc",                   # Bytecode Python
+        self.backup_patterns = [
+            "*.backup_*",
+            "*_backup_*.py",
+            "*.bak",
+            "*.tmp",
+            "*.temp"
         ]
         
-        self.fichiers_supprimes = []
-        self.taille_liberee = 0
+        # Fichiers specifiques a supprimer
+        self.specific_files = [
+            "ast_tools.log",
+            "ast_tools_previous.log",
+            "errors.log"
+        ]
+        
+        # Repertoires a nettoyer
+        self.dirs_to_clean = [
+            "__pycache__",
+            ".pytest_cache",
+            "*.egg-info",
+            ".mypy_cache",
+            ".ruff_cache"
+        ]
+        
+        # Fichiers a garder absolument
+        self.keep_files = {
+            "__init__.py",
+            "requirements.txt",
+            "pyproject.toml",
+            "README.md",
+            ".gitignore",
+            "setup.py",
+            "setup.cfg"
+        }
 
-    def git_sauvegarde(self):
-        """Fait un git add pour sauvegarder l'etat actuel"""
-        print("GIT SAUVEGARDE DE L'ETAT ACTUEL")
-        print("=" * 40)
+    def find_backup_files(self) -> List[Path]:
+        """Trouve tous les fichiers de backup"""
+        backup_files = []
         
-        try:
-            # Verifier si on est dans un repo git
-            result = subprocess.run(["git", "status"], 
-                                  capture_output=True, text=True)
-            
-            if result.returncode != 0:
-                print("Pas un repository Git - initialisation...")
-                subprocess.run(["git", "init"], check=True)
-                print("Repository Git initialise")
-            
-            # Ajouter tous les fichiers
-            subprocess.run(["git", "add", "."], check=True)
-            print("Tous les fichiers ajoutes au staging")
-            
-            # Commit avec timestamp
-            timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-            message = f"Sauvegarde avant nettoyage AST Tools - {timestamp}"
-            
-            subprocess.run(["git", "commit", "-m", message], 
-                         check=True, capture_output=True)
-            print(f"Commit cree: {message}")
-            
-            return True
-            
-        except subprocess.CalledProcessError as e:
-            print(f"Erreur Git: {e}")
-            return False
-        except FileNotFoundError:
-            print("Git non installe - sauvegarde ignoree")
-            return False
+        # Recherche des fichiers avec patterns de backup
+        for pattern in self.backup_patterns:
+            backup_files.extend(self.project_root.rglob(pattern))
+        
+        # Recherche specifique des backups de main.py
+        main_backups = list(self.project_root.glob("main.py.backup_*"))
+        backup_files.extend(main_backups)
+        
+        # Recherche des backups de modificateur_interactif
+        mod_backups = list(self.project_root.glob("modificateur_interactif_backup_*.py"))
+        backup_files.extend(mod_backups)
+        
+        return backup_files
 
-    def lister_fichiers_projet(self):
-        """Liste tous les fichiers .py du projet"""
-        fichiers_py = []
+    def find_log_files(self) -> List[Path]:
+        """Trouve tous les fichiers de log temporaires"""
+        log_files = []
         
-        # Fichiers a la racine
-        for fichier in self.projet_path.glob("*.py"):
-            fichiers_py.append(str(fichier))
-            
-        # Fichiers dans core/
-        if self.core_path.exists():
-            for fichier in self.core_path.glob("*.py"):
-                fichiers_py.append(str(fichier))
-                
-        # Fichiers dans sous-dossiers
-        for fichier in self.projet_path.rglob("*.py"):
-            if str(fichier) not in fichiers_py:
-                fichiers_py.append(str(fichier))
-                
-        return fichiers_py
+        # Logs dans le repertoire racine
+        for log_file in self.specific_files:
+            file_path = self.project_root / log_file
+            if file_path.exists():
+                log_files.append(file_path)
+        
+        # Logs dans le dossier logs/
+        logs_dir = self.project_root / "logs"
+        if logs_dir.exists():
+            # On garde seulement le dossier logs vide
+            log_files.extend([f for f in logs_dir.glob("*.log")])
+        
+        return log_files
 
-    def analyser_fichiers(self):
-        """Analyse quels fichiers garder/supprimer"""
-        print("\nANALYSE DES FICHIERS DU PROJET")
-        print("=" * 35)
+    def find_cache_dirs(self) -> List[Path]:
+        """Trouve tous les repertoires de cache"""
+        cache_dirs = []
         
-        tous_fichiers = self.lister_fichiers_projet()
-        print(f"Fichiers .py trouves: {len(tous_fichiers)}")
+        for dir_pattern in self.dirs_to_clean:
+            cache_dirs.extend(self.project_root.rglob(dir_pattern))
         
-        fichiers_a_garder = []
-        fichiers_a_supprimer = []
-        
-        for fichier in tous_fichiers:
-            fichier_path = Path(fichier)
-            fichier_relatif = str(fichier_path.relative_to(self.projet_path))
-            
-            # Verifier si essentiel
-            if fichier_relatif in self.fichiers_essentiels:
-                fichiers_a_garder.append(fichier)
-                continue
-                
-            # Verifier patterns a supprimer
-            doit_supprimer = False
-            for pattern in self.patterns_a_supprimer:
-                if fichier_path.match(pattern) or fichier_relatif.endswith(tuple(pattern.split('*')[-1:])):
-                    doit_supprimer = True
-                    break
-                    
-            if doit_supprimer:
-                fichiers_a_supprimer.append(fichier)
-            else:
-                # Fichier non reconnu - demander confirmation
-                print(f"Fichier non categorise: {fichier_relatif}")
-                fichiers_a_garder.append(fichier)  # Par securite
-        
-        return fichiers_a_garder, fichiers_a_supprimer
+        return cache_dirs
 
-    def afficher_plan_nettoyage(self, a_garder, a_supprimer):
-        """Affiche le plan de nettoyage"""
-        print(f"\nPLAN DE NETTOYAGE")
-        print("=" * 20)
-        
-        print(f"\nFichiers a GARDER ({len(a_garder)}):")
-        for fichier in sorted(a_garder):
-            taille = Path(fichier).stat().st_size if Path(fichier).exists() else 0
-            print(f"  ✅ {Path(fichier).relative_to(self.projet_path)} ({taille} bytes)")
-            
-        print(f"\nFichiers a SUPPRIMER ({len(a_supprimer)}):")
-        taille_totale = 0
-        for fichier in sorted(a_supprimer):
-            if Path(fichier).exists():
-                taille = Path(fichier).stat().st_size
-                taille_totale += taille
-                print(f"  ❌ {Path(fichier).relative_to(self.projet_path)} ({taille} bytes)")
-            else:
-                print(f"  ❌ {Path(fichier).relative_to(self.projet_path)} (introuvable)")
-                
-        print(f"\nEspace a liberer: {taille_totale} bytes ({taille_totale/1024:.1f} KB)")
-        return taille_totale
+    def find_pyc_files(self) -> List[Path]:
+        """Trouve tous les fichiers .pyc"""
+        return list(self.project_root.rglob("*.pyc"))
 
-    def executer_nettoyage(self, fichiers_a_supprimer):
-        """Execute le nettoyage"""
-        print(f"\nEXECUTION DU NETTOYAGE")
-        print("=" * 25)
+    def find_duplicate_or_temp_files(self) -> List[Path]:
+        """Trouve les fichiers temporaires ou dupliques potentiels"""
+        temp_files = []
         
-        for fichier in fichiers_a_supprimer:
-            try:
-                fichier_path = Path(fichier)
-                if fichier_path.exists():
-                    taille = fichier_path.stat().st_size
-                    fichier_path.unlink()
-                    self.fichiers_supprimes.append(fichier)
-                    self.taille_liberee += taille
-                    print(f"  Supprime: {fichier_path.relative_to(self.projet_path)}")
-                else:
-                    print(f"  Deja supprime: {fichier_path.relative_to(self.projet_path)}")
-                    
-            except Exception as e:
-                print(f"  Erreur suppression {fichier}: {e}")
-
-    def nettoyer_dossiers_vides(self):
-        """Supprime les dossiers vides"""
-        print(f"\nSUPPRESSION DOSSIERS VIDES")
-        print("=" * 30)
+        # Fichiers .py~ (editeur vim/emacs)
+        temp_files.extend(self.project_root.rglob("*.py~"))
         
-        dossiers_supprimes = 0
-        for dossier in self.projet_path.rglob("*"):
-            if (dossier.is_dir() and 
-                dossier.name != ".git" and
-                not any(dossier.iterdir())):  # Dossier vide
-                try:
-                    dossier.rmdir()
-                    print(f"  Dossier vide supprime: {dossier.relative_to(self.projet_path)}")
-                    dossiers_supprimes += 1
-                except Exception as e:
-                    print(f"  Erreur suppression dossier {dossier}: {e}")
-                    
-        if dossiers_supprimes == 0:
-            print("  Aucun dossier vide trouve")
+        # Fichiers .swp (vim)
+        temp_files.extend(self.project_root.rglob("*.swp"))
+        
+        # Fichiers .DS_Store (macOS)
+        temp_files.extend(self.project_root.rglob(".DS_Store"))
+        
+        # Fichiers Thumbs.db (Windows)
+        temp_files.extend(self.project_root.rglob("Thumbs.db"))
+        
+        return temp_files
 
-    def afficher_rapport_final(self):
-        """Affiche le rapport final"""
-        print(f"\n" + "=" * 50)
-        print(f"RAPPORT FINAL DE NETTOYAGE")
+    def analyze_project(self):
+        """Analyse le projet et collecte tous les fichiers a supprimer"""
+        print("[ANALYSE] Analyse du projet en cours...")
         print("=" * 50)
         
-        print(f"Fichiers supprimes: {len(self.fichiers_supprimes)}")
-        print(f"Espace libere: {self.taille_liberee} bytes ({self.taille_liberee/1024:.1f} KB)")
+        # Collecte des fichiers
+        backup_files = self.find_backup_files()
+        log_files = self.find_log_files()
+        cache_dirs = self.find_cache_dirs()
+        pyc_files = self.find_pyc_files()
+        temp_files = self.find_duplicate_or_temp_files()
         
-        print(f"\nFichiers essentiels conserves:")
-        for fichier in sorted(self.fichiers_essentiels):
-            if Path(fichier).exists():
-                print(f"  ✅ {fichier}")
-            else:
-                print(f"  ⚠️  {fichier} (manquant)")
-                
-        print(f"\nProjet nettoye et pret pour les nouveaux plugins !")
+        # Ajout a la liste de suppression
+        self.files_to_delete.extend(backup_files)
+        self.files_to_delete.extend(log_files)
+        self.files_to_delete.extend(pyc_files)
+        self.files_to_delete.extend(temp_files)
+        self.dirs_to_delete.extend(cache_dirs)
+        
+        # Affichage du rapport
+        self.display_report(backup_files, log_files, cache_dirs, pyc_files, temp_files)
 
-    def executer_nettoyage_complet(self):
-        """Execute le nettoyage complet"""
-        print("NETTOYAGE COMPLET AST TOOLS")
-        print("=" * 30)
+    def display_report(self, backup_files, log_files, cache_dirs, pyc_files, temp_files):
+        """Affiche un rapport detaille des fichiers trouves"""
         
-        # 1. Sauvegarde Git
-        if not self.git_sauvegarde():
-            reponse = input("\nGit echec. Continuer sans sauvegarde ? (y/N): ")
-            if reponse.lower() != 'y':
-                print("Nettoyage annule")
-                return
+        if backup_files:
+            print(f"\n[BACKUP] Fichiers de backup trouves ({len(backup_files)}):")
+            for f in backup_files[:10]:  # Limite l'affichage a 10
+                print(f"  - {f.relative_to(self.project_root)}")
+            if len(backup_files) > 10:
+                print(f"  ... et {len(backup_files) - 10} autres")
         
-        # 2. Analyse des fichiers
-        a_garder, a_supprimer = self.analyser_fichiers()
+        if log_files:
+            print(f"\n[LOGS] Fichiers de log trouves ({len(log_files)}):")
+            for f in log_files:
+                print(f"  - {f.relative_to(self.project_root)}")
         
-        # 3. Afficher le plan
-        taille_a_liberer = self.afficher_plan_nettoyage(a_garder, a_supprimer)
+        if cache_dirs:
+            print(f"\n[CACHE] Repertoires de cache trouves ({len(cache_dirs)}):")
+            for d in cache_dirs:
+                print(f"  - {d.relative_to(self.project_root)}")
         
-        # 4. Confirmation
-        if a_supprimer:
-            print(f"\n⚠️  ATTENTION: {len(a_supprimer)} fichiers seront supprimes !")
-            reponse = input("Continuer le nettoyage ? (y/N): ")
-            if reponse.lower() != 'y':
-                print("Nettoyage annule")
-                return
-        else:
-            print("\nAucun fichier a supprimer - projet deja propre")
+        if pyc_files:
+            print(f"\n[PYC] Fichiers .pyc trouves ({len(pyc_files)}):")
+            if len(pyc_files) > 5:
+                print(f"  Total: {len(pyc_files)} fichiers")
+            else:
+                for f in pyc_files:
+                    print(f"  - {f.relative_to(self.project_root)}")
+        
+        if temp_files:
+            print(f"\n[TEMP] Fichiers temporaires trouves ({len(temp_files)}):")
+            for f in temp_files:
+                print(f"  - {f.relative_to(self.project_root)}")
+        
+        total_files = len(self.files_to_delete)
+        total_dirs = len(self.dirs_to_delete)
+        
+        print("\n" + "=" * 50)
+        print(f"[RESUME] {total_files} fichiers et {total_dirs} repertoires a supprimer")
+        
+        if total_files + total_dirs > 0:
+            # Calcul de la taille totale
+            total_size = 0
+            for f in self.files_to_delete:
+                if f.exists():
+                    total_size += f.stat().st_size
+            
+            print(f"[ESPACE] Espace a liberer: {self.format_size(total_size)}")
+    
+    def format_size(self, size_bytes):
+        """Formate la taille en unite lisible"""
+        for unit in ['B', 'KB', 'MB', 'GB']:
+            if size_bytes < 1024.0:
+                return f"{size_bytes:.2f} {unit}"
+            size_bytes /= 1024.0
+        return f"{size_bytes:.2f} TB"
+
+    def clean(self, dry_run=False):
+        """Nettoie le projet"""
+        if not self.files_to_delete and not self.dirs_to_delete:
+            print("\n[OK] Le projet est deja propre! Aucun fichier a supprimer.")
             return
         
-        # 5. Execution
-        self.executer_nettoyage(a_supprimer)
-        self.nettoyer_dossiers_vides()
+        if dry_run:
+            print("\n[INFO] MODE DRY-RUN: Aucun fichier ne sera supprime")
+            return
         
-        # 6. Rapport final
-        self.afficher_rapport_final()
+        print("\n" + "=" * 50)
+        print("[ATTENTION] Cette action est irreversible!")
+        print("=" * 50)
+        
+        response = input("\n[?] Voulez-vous vraiment supprimer ces fichiers? (oui/non): ").lower()
+        
+        if response in ['oui', 'o', 'yes', 'y']:
+            self.execute_cleanup()
+        else:
+            print("\n[ANNULE] Nettoyage annule.")
+
+    def execute_cleanup(self):
+        """Execute la suppression des fichiers"""
+        print("\n[NETTOYAGE] Nettoyage en cours...")
+        
+        deleted_files = 0
+        deleted_dirs = 0
+        errors = []
+        
+        # Suppression des fichiers
+        for file_path in self.files_to_delete:
+            try:
+                if file_path.exists():
+                    file_path.unlink()
+                    deleted_files += 1
+                    print(f"  [OK] Supprime: {file_path.relative_to(self.project_root)}")
+            except Exception as e:
+                errors.append(f"Erreur avec {file_path}: {e}")
+        
+        # Suppression des repertoires
+        for dir_path in self.dirs_to_delete:
+            try:
+                if dir_path.exists():
+                    shutil.rmtree(dir_path)
+                    deleted_dirs += 1
+                    print(f"  [OK] Supprime: {dir_path.relative_to(self.project_root)}/")
+            except Exception as e:
+                errors.append(f"Erreur avec {dir_path}: {e}")
+        
+        # Rapport final
+        print("\n" + "=" * 50)
+        print("[TERMINE] Nettoyage termine!")
+        print(f"  - {deleted_files} fichiers supprimes")
+        print(f"  - {deleted_dirs} repertoires supprimes")
+        
+        if errors:
+            print(f"\n[ERREURS] {len(errors)} erreurs rencontrees:")
+            for error in errors[:5]:
+                print(f"  - {error}")
+        
+        print("\n[INFO] Prochaines etapes:")
+        print("  1. Verifiez que tout fonctionne: python main.py")
+        print("  2. Ajoutez les fichiers a Git: git add .")
+        print("  3. Committez: git commit -m 'Nettoyage du projet'")
+        print("  4. Poussez sur GitHub: git push origin main")
+
+    def create_gitignore(self):
+        """Cree ou met a jour le fichier .gitignore"""
+        gitignore_path = self.project_root / ".gitignore"
+        
+        gitignore_content = """# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.pyc
+.Python
+env/
+venv/
+ENV/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Logs
+*.log
+logs/*.log
+
+# Backups
+*.backup_*
+*_backup_*
+*.bak
+*.tmp
+*.temp
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Testing
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Documentation
+docs/_build/
+"""
+        
+        if not gitignore_path.exists():
+            gitignore_path.write_text(gitignore_content)
+            print(f"\n[OK] Fichier .gitignore cree")
+        else:
+            print(f"\n[INFO] .gitignore existe deja")
+
 
 def main():
     """Fonction principale"""
-    nettoyeur = NettoyeurProjet()
-    nettoyeur.executer_nettoyage_complet()
+    print("""
++==================================================+
+|     NETTOYEUR DE PROJET AST_TOOLS               |
+|     Prepare votre projet pour GitHub            |
++==================================================+
+    """)
+    
+    # Verification du repertoire
+    if not Path("AST.py").exists():
+        print("[ERREUR] Ce script doit etre execute depuis la racine du projet AST_tools!")
+        sys.exit(1)
+    
+    cleaner = ProjectCleaner()
+    
+    # Menu
+    print("Options disponibles:")
+    print("  1. Analyser seulement (dry-run)")
+    print("  2. Nettoyer le projet")
+    print("  3. Creer/Mettre a jour .gitignore")
+    print("  4. Tout faire (nettoyer + .gitignore)")
+    print("  0. Quitter")
+    
+    choice = input("\nVotre choix (0-4): ").strip()
+    
+    if choice == "1":
+        cleaner.analyze_project()
+        cleaner.clean(dry_run=True)
+    elif choice == "2":
+        cleaner.analyze_project()
+        cleaner.clean(dry_run=False)
+    elif choice == "3":
+        cleaner.create_gitignore()
+    elif choice == "4":
+        cleaner.analyze_project()
+        cleaner.clean(dry_run=False)
+        cleaner.create_gitignore()
+    elif choice == "0":
+        print("\n[AU REVOIR] A bientot!")
+    else:
+        print("\n[ERREUR] Choix invalide")
+
 
 if __name__ == "__main__":
     main()
