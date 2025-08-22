@@ -7,6 +7,10 @@ import os
 import sys
 from typing import List
 
+# Imports Pydantic
+from core.models import TransformationPlanModel
+from pydantic import ValidationError
+
 from core.global_logger import (
     log_success,
     log_warning,
@@ -129,61 +133,60 @@ class OrchestrateurAST:
         except Exception as e:
             log_warning(f"Erreur systeme modulaire: {e}")
 
-    def executer_plan(self, chemin_plan_json: str, fichiers_cibles: List[str]):
+    def executer_plan(self, chemin_plan_json: str, fichiers_cibles: List[str]) -> bool:
         """
-        Execute un plan de transformation complet a partir d'un fichier JSON.
+        Execute un plan de transformation valide par Pydantic.
+        Retourne True si succes, False sinon.
         """
         self.log_message(f"Execution du plan : {os.path.basename(chemin_plan_json)}")
 
         try:
             with open(chemin_plan_json, encoding="utf-8") as f:
-                plan = json.load(f)
-        except Exception as e:
-            self.log_message(f"ERREUR: Impossible de lire le plan JSON : {e}")
-            return
+                donnees_json = json.load(f)
+            
+            # Validation Pydantic
+            plan = TransformationPlanModel(**donnees_json)
 
-        instructions = plan.get("transformations", [])
-        if not instructions:
-            self.log_message(
-                "AVERTISSEMENT: Le plan ne contient aucune instruction de transformation."
-            )
-            return
+        except FileNotFoundError:
+            self.log_message(f"ERREUR: Fichier de plan introuvable : {chemin_plan_json}")
+            return False
+        except ValidationError as e:
+            self.log_message("ERREUR: Le plan JSON est invalide et ne peut pas etre execute.")
+            self.log_message(f"Details de l'erreur: {e}")
+            return False
+        except Exception as e:
+            self.log_message(f"ERREUR inattendue lors de la lecture du plan : {e}")
+            return False
+
+        self.log_message(f"Plan '{plan.name}' v{plan.version} valide avec succes.")
+        
+        if not plan.transformations:
+            self.log_message("AVERTISSEMENT: Le plan ne contient aucune instruction.")
+            return True
 
         self.log_message(
-            f"{len(instructions)} instruction(s) a executer sur {len(fichiers_cibles)} fichier(s)."
+            f"{len(plan.transformations)} instruction(s) a executer sur {len(fichiers_cibles)} fichier(s)."
         )
 
-        for i, instruction in enumerate(instructions, 1):
+        success_count = 0
+        for i, instruction in enumerate(plan.transformations, 1):
             self.log_message(
-                f"\n--- Instruction {i}/{len(instructions)}: {instruction.get('description', 'N/A')} ---"
+                f"\n        --- Instruction {i}/{len(plan.transformations)}: {instruction.description} ---"
             )
-
-            instruction_type = instruction.get("type")
-
-            if instruction_type == "appel_plugin":
-                plugin_name = instruction.get("plugin_name")
-                if not plugin_name:
-                    self.log_message(
-                        "ERREUR: 'plugin_name' manquant pour 'appel_plugin'."
-                    )
-                    continue
-
+            
+            if instruction.type == "appel_plugin":
                 for fichier in fichiers_cibles:
-                    self.appliquer_transformation_modulaire(
-                        fichier, fichier, plugin_name
-                    )
-
-            elif instruction_type == "remplacement_simple":
-                self.log_message(
-                    "INFO: Le type 'remplacement_simple' n'est pas encore implemente."
-                )
-
+                    if self.appliquer_transformation_modulaire(
+                        fichier, fichier, instruction.plugin_name
+                    ):
+                        success_count += 1
+            elif instruction.type == "remplacement_simple":
+                self.log_message("INFO: Le type 'remplacement_simple' n'est pas encore implemente.")
             else:
-                self.log_message(
-                    f"AVERTISSEMENT: Type d'instruction inconnu '{instruction_type}'."
-                )
+                self.log_message(f"AVERTISSEMENT: Type d'instruction inconnu '{instruction.type}'.")
 
-        self.log_message("\nPlan de transformation termine.")
+        self.log_message("Plan de transformation termine.")
+        return success_count > 0
 
     def appliquer_transformation_modulaire(
         self, fichier_source, fichier_sortie, transformation_name

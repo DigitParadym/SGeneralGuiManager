@@ -1,0 +1,10 @@
+{
+  "description": "Plan sans nom - INVALIDE",
+  "transformations": [
+    {
+      "type": "appel_plugin",
+      "description": "Plugin inexistant",
+      "plugin_name": "plugin_qui_nexiste_pas"
+    }
+  ]
+}

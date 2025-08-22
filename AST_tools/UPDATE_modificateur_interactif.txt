@@ -1,0 +1,65 @@
+
+# === DEBUT DES MODIFICATIONS POUR PYDANTIC ===
+# Ajoutez ces imports en haut du fichier apres les imports existants:
+
+from core.models import TransformationPlanModel
+from pydantic import ValidationError
+
+# Remplacez la methode executer_plan par cette version:
+
+    def executer_plan(self, chemin_plan_json: str, fichiers_cibles: List[str]) -> bool:
+        """
+        Execute un plan de transformation valide par Pydantic.
+        Retourne True si succes, False sinon.
+        """
+        self.log_message(f"Execution du plan : {os.path.basename(chemin_plan_json)}")
+
+        try:
+            with open(chemin_plan_json, encoding="utf-8") as f:
+                donnees_json = json.load(f)
+            
+            # Validation Pydantic
+            plan = TransformationPlanModel(**donnees_json)
+
+        except FileNotFoundError:
+            self.log_message(f"ERREUR: Fichier de plan introuvable : {chemin_plan_json}")
+            return False
+        except ValidationError as e:
+            self.log_message("ERREUR: Le plan JSON est invalide et ne peut pas etre execute.")
+            self.log_message(f"Details de l'erreur:\n{e}")
+            return False
+        except Exception as e:
+            self.log_message(f"ERREUR inattendue lors de la lecture du plan : {e}")
+            return False
+
+        self.log_message(f"Plan '{plan.name}' v{plan.version} valide avec succes.")
+        
+        if not plan.transformations:
+            self.log_message("AVERTISSEMENT: Le plan ne contient aucune instruction.")
+            return True
+
+        self.log_message(
+            f"{len(plan.transformations)} instruction(s) a executer sur {len(fichiers_cibles)} fichier(s)."
+        )
+
+        success_count = 0
+        for i, instruction in enumerate(plan.transformations, 1):
+            self.log_message(
+                f"\n--- Instruction {i}/{len(plan.transformations)}: {instruction.description} ---"
+            )
+            
+            if instruction.type == "appel_plugin":
+                for fichier in fichiers_cibles:
+                    if self.appliquer_transformation_modulaire(
+                        fichier, fichier, instruction.plugin_name
+                    ):
+                        success_count += 1
+            elif instruction.type == "remplacement_simple":
+                self.log_message("INFO: Le type 'remplacement_simple' n'est pas encore implemente.")
+            else:
+                self.log_message(f"AVERTISSEMENT: Type d'instruction inconnu '{instruction.type}'.")
+
+        self.log_message("\nPlan de transformation termine.")
+        return success_count > 0
+
+# === FIN DES MODIFICATIONS POUR PYDANTIC ===

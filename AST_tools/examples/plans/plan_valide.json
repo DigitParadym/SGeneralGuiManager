@@ -1,0 +1,18 @@
+{
+  "name": "Plan de refactorisation basique",
+  "description": "Convertit les prints en logging et ajoute des docstrings",
+  "version": 1.0,
+  "author": "AST Tools",
+  "transformations": [
+    {
+      "type": "appel_plugin",
+      "description": "Conversion print vers logging",
+      "plugin_name": "print_to_logging_transform"
+    },
+    {
+      "type": "appel_plugin",
+      "description": "Ajout de docstrings aux fonctions",
+      "plugin_name": "add_docstrings_transform"
+    }
+  ]
+}

@@ -40,6 +40,10 @@ from PySide6.QtWidgets import (
 # Import du logger global
 from core.global_logger import log_end, log_start
 
+# Imports Pydantic
+from core.models import TransformationPlanModel
+from pydantic import ValidationError
+
 # Import pour l'integration Ruff
 try:
     from gui.tabs.ruff_tab import RuffIntegrationTab
@@ -348,17 +352,39 @@ class ASTMainWindow(QMainWindow):
         try:
             with open(plan_path, encoding="utf-8") as f:
                 plan_data = json.load(f)
-            self.current_plan = plan_data
-            info_text = f"Nom: {plan_data.get('name', 'N/A')}\n"
-            info_text += f"Description: {plan_data.get('description', 'N/A')}\n"
-            info_text += f"Transformations: {len(plan_data.get('transformations', []))}"
+            
+            # Validation Pydantic
+            plan_model = TransformationPlanModel(**plan_data)
+            
+            self.current_plan = plan_model
+            info_text = f"Nom: {plan_model.name}\n"
+            info_text += f"Description: {plan_model.description}\n"
+            info_text += f"Version: {plan_model.version}\n"
+            if hasattr(plan_model, 'author') and plan_model.author:
+                info_text += f"Auteur: {plan_model.author}\n"
+            info_text += f"Transformations: {len(plan_model.transformations)}"
+            
             self.plan_info.setText(info_text)
             self.update_execute_button()
-            self.log_message(f"Plan charge: {os.path.basename(plan_path)}")
+            self.log_message(f"Plan valide et charge: {os.path.basename(plan_path)}")
+
+        except ValidationError as e:
+            self.current_plan = None
+            error_message = f"ERREUR: Plan JSON invalide.\n\n"
+            # Formatter les erreurs Pydantic de maniere lisible
+            for error in e.errors():
+                field = " -> ".join(str(x) for x in error["loc"])
+                error_message += f"- {field}: {error['msg']}\n"
+            
+            self.plan_info.setText(error_message)
+            QMessageBox.warning(self, "Plan Invalide", error_message)
+            self.log_message(f"Echec de chargement du plan invalide: {os.path.basename(plan_path)}")
         except Exception as e:
             self.current_plan = None
-            self.plan_info.setText(f"ERREUR: {e}")
+            self.plan_info.setText(f"ERREUR de lecture: {e}")
             self.log_message(f"Erreur chargement plan: {e}")
+        
+        self.update_execute_button()
 
     def add_target_files(self):
         files, _ = QFileDialog.getOpenFileNames(
