@@ -1,0 +1,21 @@
+RESTRUCTURATION COMPLETEE
+
+Nouvelle structure:
+  core/transformations/
+    base/           - Classes de base
+    wrappers/       - Type 1: Intelligence Externe
+    artisans/       - Type 2: Intelligence Interne
+    deprecated/     - Plugins obsoletes
+
+Actions effectuees:
+  1. Creation de la structure de dossiers
+  2. Migration des plugins existants
+  3. Creation des templates wrapper
+  4. Suppression de json_ai_transformer.py
+  5. Mise a jour des fichiers __init__.py
+
+Prochaines etapes:
+  1. Tester les imports avec: python -m core.transformation_loader
+  2. Adapter transformation_loader.py pour la nouvelle structure
+  3. Implementer la logique specifique dans chaque wrapper
+  4. Executer les tests: python -m tests.run_tests

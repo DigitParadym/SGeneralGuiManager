@@ -7,14 +7,25 @@ from pydantic import BaseModel, Field, validator
 from typing import List, Literal, Dict, Any, Optional
 
 # Liste des plugins disponibles (a terme, charger depuis TransformationLoader)
-AVAILABLE_PLUGINS = {
-    "print_to_logging_transform",
-    "add_docstrings_transform", 
-    "unused_import_remover",
-    "pathlib_transformer_optimized",
-    "exemple_working_transform",
-    "json_ai_transformer"
+# Liste des plugins disponibles
+AVAILABLE_WRAPPERS = {
+    "black_wrapper",
+    "isort_wrapper", 
+    "ruff_wrapper",
+    "autoflake_wrapper",
+    "autopep8_wrapper",
+    "pyupgrade_wrapper"
 }
+
+AVAILABLE_ARTISANS = {
+    "add_docstrings_transform",
+    "pathlib_transformer_optimized",
+    "print_to_logging_transform",
+    "unused_import_remover",
+    "hello_user_transform"
+}
+
+AVAILABLE_PLUGINS = AVAILABLE_WRAPPERS | AVAILABLE_ARTISANS
 
 class TransformationModel(BaseModel):
     """

@@ -1,0 +1,14 @@
+{
+  "name": "Ajout interaction utilisateur",
+  "description": "Ajoute une interaction Hello User au programme",
+  "version": 1.0,
+  "author": "AST Tools",
+  "transformations": [
+    {
+      "type": "appel_plugin",
+      "description": "Ajoute demande de nom et messages personnalises",
+      "plugin_name": "hello_user_transform",
+      "params": {}
+    }
+  ]
+}
