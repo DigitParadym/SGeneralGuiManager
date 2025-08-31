@@ -9,7 +9,6 @@ import json
 import os
 import subprocess
 from datetime import datetime
-from pathlib import Path
 
 from PySide6.QtCore import Qt, QThread, Signal
 from PySide6.QtWidgets import (
@@ -49,9 +48,7 @@ class RuffWorker(QThread):
 
         for index, file in enumerate(self.files, 1):
             self.file_progress.emit(index, total_files)
-            self.progress.emit(
-                f"Analyse de {os.path.basename(file)}... ({index}/{total_files})"
-            )
+            self.progress.emit(f"Analyse de {os.path.basename(file)}... ({index}/{total_files})")
 
             try:
                 if self.command == "check":
@@ -62,7 +59,7 @@ class RuffWorker(QThread):
 
                     # Premiere execution pour obtenir les stats
                     result = subprocess.run(
-                        cmd + ["--format", "json"],
+                        [*cmd, "--format", "json"],
                         capture_output=True,
                         text=True,
                         timeout=30,
@@ -183,9 +180,7 @@ class MypyWorker(QThread):
             except subprocess.TimeoutExpired:
                 results["files"].append({"file": file, "error": "Timeout (>30s)"})
             except FileNotFoundError:
-                self.progress.emit(
-                    "[X] mypy non installe. Installez avec: pip install mypy"
-                )
+                self.progress.emit("[X] mypy non installe. Installez avec: pip install mypy")
                 break
             except Exception as e:
                 results["files"].append({"file": file, "error": str(e)})
@@ -282,9 +277,7 @@ class RuffIntegrationTab(QWidget):
 
         # NOUVEAU: Bouton Analyser et Fix
         self.check_fix_btn = QPushButton("Analyser et Fix (--fix)")
-        self.check_fix_btn.setToolTip(
-            "Analyser ET corriger automatiquement les erreurs reparables"
-        )
+        self.check_fix_btn.setToolTip("Analyser ET corriger automatiquement les erreurs reparables")
         self.check_fix_btn.setStyleSheet("""
             QPushButton {
                 background-color: #5cb85c;
@@ -438,9 +431,7 @@ class RuffIntegrationTab(QWidget):
     def check_tools_availability(self):
         """Verifie si Ruff est installe."""
         try:
-            result = subprocess.run(
-                ["ruff", "--version"], capture_output=True, text=True
-            )
+            result = subprocess.run(["ruff", "--version"], capture_output=True, text=True)
             self.log_message(f"[OK] Ruff disponible: {result.stdout.strip()}")
         except (FileNotFoundError, subprocess.SubprocessError, Exception):
             self.log_message("[X] Ruff non installe. Installez avec: pip install ruff")
@@ -505,9 +496,7 @@ class RuffIntegrationTab(QWidget):
                 added_count += 1
 
         if added_count > 0:
-            self.log_message(
-                f"[OK] {added_count} fichier(s) Python trouve(s) et ajoute(s)"
-            )
+            self.log_message(f"[OK] {added_count} fichier(s) Python trouve(s) et ajoute(s)")
         else:
             self.log_message(f"[!] Aucun nouveau fichier Python trouve dans {folder}")
 
@@ -601,9 +590,7 @@ class RuffIntegrationTab(QWidget):
             return
 
         self.show_progress(True)
-        self.log_message(
-            f"Demarrage de l'analyse avec correction sur {len(files)} fichier(s)..."
-        )
+        self.log_message(f"Demarrage de l'analyse avec correction sur {len(files)} fichier(s)...")
         self.log_message("[INFO] Mode: Analyse et correction automatique (--fix)")
 
         self.current_worker = RuffWorker(files, "check", auto_fix=True)
@@ -682,18 +669,15 @@ class RuffIntegrationTab(QWidget):
         }
 
         self.log_message(f"\n{'=' * 50}")
-        self.log_message(f"ANALYSE TERMINEE (Diagnostic)")
+        self.log_message("ANALYSE TERMINEE (Diagnostic)")
         self.log_message(f"Fichiers analyses: {len(results['files'])}")
         self.log_message(f"Problemes trouves: {results['total_issues']}")
 
         if results["total_issues"] > 0:
-            self.log_message(
-                f"[TIP] Utilisez 'Analyser et Fix' pour corriger automatiquement"
-            )
+            self.log_message("[TIP] Utilisez 'Analyser et Fix' pour corriger automatiquement")
 
         self.stats_label.setText(
-            f"Statistiques: {len(results['files'])} fichiers, "
-            f"{results['total_issues']} probleme(s)"
+            f"Statistiques: {len(results['files'])} fichiers, {results['total_issues']} probleme(s)"
         )
 
         if results["total_issues"] > 0:
@@ -713,7 +697,7 @@ class RuffIntegrationTab(QWidget):
         }
 
         self.log_message(f"\n{'=' * 50}")
-        self.log_message(f"ANALYSE ET CORRECTION TERMINEE")
+        self.log_message("ANALYSE ET CORRECTION TERMINEE")
         self.log_message(f"Fichiers traites: {len(results['files'])}")
         self.log_message(f"Problemes restants: {results['total_issues']}")
 
@@ -741,7 +725,7 @@ class RuffIntegrationTab(QWidget):
         failed = len(results["files"]) - success
 
         self.log_message(f"\n{'=' * 50}")
-        self.log_message(f"FORMATAGE TERMINE")
+        self.log_message("FORMATAGE TERMINE")
         self.log_message(f"[OK] {success} fichier(s) formate(s) avec succes")
         if failed > 0:
             self.log_message(f"[X] {failed} fichier(s) ont echoue")
@@ -770,7 +754,7 @@ class RuffIntegrationTab(QWidget):
 
             self.log_message(f"[OK] Resultats exportes: {file_path}")
         except Exception as e:
-            self.log_message(f"[X] Erreur lors de l'export: {str(e)}")
+            self.log_message(f"[X] Erreur lors de l'export: {e!s}")
 
     def log_message(self, message):
         """Affiche un message dans la zone de sortie."""
@@ -781,9 +765,10 @@ class RuffIntegrationTab(QWidget):
 
     def copy_to_clipboard(self):
         """Copie le contenu des resultats dans le presse-papiers."""
-        from PySide6.QtWidgets import QApplication
-        from PySide6.QtCore import QTimer
         from datetime import datetime
+
+        from PySide6.QtCore import QTimer
+        from PySide6.QtWidgets import QApplication
 
         text_content = self.output_text.toPlainText()
 
@@ -809,9 +794,7 @@ class RuffIntegrationTab(QWidget):
 
         # Verification mypy (AJOUT AUTOMATIQUE)
         try:
-            result = subprocess.run(
-                ["mypy", "--version"], capture_output=True, text=True
-            )
+            result = subprocess.run(["mypy", "--version"], capture_output=True, text=True)
             self.log_message(f"[OK] Mypy disponible: {result.stdout.strip()}")
             self.mypy_btn.setEnabled(True)
             self.mypy_strict_btn.setEnabled(True)
@@ -845,9 +828,7 @@ class RuffIntegrationTab(QWidget):
             return
 
         self.show_progress(True)
-        self.log_message(
-            f"Demarrage de l'analyse mypy STRICT sur {len(files)} fichier(s)..."
-        )
+        self.log_message(f"Demarrage de l'analyse mypy STRICT sur {len(files)} fichier(s)...")
         self.log_message("[INFO] Mode: Verification de types STRICT")
 
         self.current_worker = MypyWorker(files, strict_mode=True)
@@ -871,7 +852,7 @@ class RuffIntegrationTab(QWidget):
         }
 
         self.log_message(f"\n{'=' * 50}")
-        self.log_message(f"VERIFICATION DES TYPES TERMINEE (mypy)")
+        self.log_message("VERIFICATION DES TYPES TERMINEE (mypy)")
         self.log_message(f"Fichiers analyses: {len(results['files'])}")
         self.log_message(f"Erreurs de types: {results['total_errors']}")
         self.log_message(f"Avertissements: {results['total_warnings']}")

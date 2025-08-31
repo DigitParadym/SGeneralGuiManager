@@ -63,33 +63,29 @@ def log_info(message):
 
 
 def log_success(message):
-    log.info(f"SUCCESS: {str(message)}")
+    log.info(f"SUCCESS: {message!s}")
 
 
 def log_warning(message):
-    log.warning(f"WARNING: {str(message)}")
+    log.warning(f"WARNING: {message!s}")
 
 
 def log_error(message, exc_info=False):
-    log.error(f"ERROR: {str(message)}", exc_info=exc_info)
+    log.error(f"ERROR: {message!s}", exc_info=exc_info)
 
 
 def log_start(operation_name):
     separator = "=" * 80
     log.info(separator)
-    log.info(
-        "DEBUT SESSION AST_TOOLS - {}".format(
-            datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        )
-    )
+    log.info("DEBUT SESSION AST_TOOLS - {}".format(datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
     log.info(separator)
-    log.info(f"{str(operation_name)}")
+    log.info(f"{operation_name!s}")
     log.info("-" * 80)
 
 
 def log_end(operation_name):
     log.info("-" * 80)
-    log.info(f"FIN: {str(operation_name)}")
+    log.info(f"FIN: {operation_name!s}")
     log.info("=" * 80)
 
 
@@ -118,7 +114,7 @@ def log_plan_info(plan_data, plan_file):
 def log_exception(operation, exception):
     import traceback
 
-    log.error(f"EXCEPTION pendant {operation}: {str(exception)}")
+    log.error(f"EXCEPTION pendant {operation}: {exception!s}")
     log.error("Traceback complet:")
     log.error(traceback.format_exc())
 

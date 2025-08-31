@@ -99,9 +99,7 @@ def run_all_unittests():
     output_buffer = StringIO()
 
     # Lancer tous les tests avec capture de sortie
-    with contextlib.redirect_stdout(output_buffer), contextlib.redirect_stderr(
-        output_buffer
-    ):
+    with contextlib.redirect_stdout(output_buffer), contextlib.redirect_stderr(output_buffer):
         runner = unittest.TextTestRunner(stream=output_buffer, verbosity=2)
         result = runner.run(suite)
 
@@ -114,9 +112,7 @@ def run_all_unittests():
     report_lines.append("RAPPORT COMPLET - TESTS UNITAIRES")
     report_lines.append("=" * 60)
     report_lines.append(f"Tests executes: {result.testsRun}")
-    report_lines.append(
-        f"Succes: {result.testsRun - len(result.failures) - len(result.errors)}"
-    )
+    report_lines.append(f"Succes: {result.testsRun - len(result.failures) - len(result.errors)}")
     report_lines.append(f"Echecs: {len(result.failures)}")
     report_lines.append(f"Erreurs: {len(result.errors)}")
     report_lines.append(f"Ignores: {len(result.skipped)}")
@@ -124,8 +120,7 @@ def run_all_unittests():
     # Calculer le pourcentage de reussite
     if result.testsRun > 0:
         success_rate = (
-            (result.testsRun - len(result.failures) - len(result.errors))
-            / result.testsRun
+            (result.testsRun - len(result.failures) - len(result.errors)) / result.testsRun
         ) * 100
         report_lines.append(f"Taux de reussite: {success_rate:.1f}%")
 
@@ -136,9 +131,7 @@ def run_all_unittests():
         report_lines.append(f"\nECHECS DETAILLES ({len(result.failures)}):")
         for i, (test, traceback) in enumerate(result.failures, 1):
             test_name = str(test).split()[0]
-            error_summary = (
-                traceback.split("\n")[-2] if "\n" in traceback else traceback
-            )
+            error_summary = traceback.split("\n")[-2] if "\n" in traceback else traceback
             report_lines.append(f"{i}. {test_name}")
             report_lines.append(f"   Erreur: {error_summary}")
             problems_detected.append(f"ECHEC: {test_name} - {error_summary}")
@@ -147,9 +140,7 @@ def run_all_unittests():
         report_lines.append(f"\nERREURS DETAILLEES ({len(result.errors)}):")
         for i, (test, traceback) in enumerate(result.errors, 1):
             test_name = str(test).split()[0]
-            error_summary = (
-                traceback.split("\n")[-2] if "\n" in traceback else traceback
-            )
+            error_summary = traceback.split("\n")[-2] if "\n" in traceback else traceback
             report_lines.append(f"{i}. {test_name}")
             report_lines.append(f"   Erreur: {error_summary}")
             problems_detected.append(f"ERREUR: {test_name} - {error_summary}")
@@ -162,32 +153,20 @@ def run_all_unittests():
         report_lines.append("- Dossier core/transformations manquant ou mal configure")
 
     if "fix_mutable_defaults_transform non trouve" in test_output:
-        problems_detected.append(
-            "PROBLEME: Transformateur fix_mutable_defaults_transform absent"
-        )
-        report_lines.append(
-            "- Transformateur fix_mutable_defaults_transform non trouve"
-        )
+        problems_detected.append("PROBLEME: Transformateur fix_mutable_defaults_transform absent")
+        report_lines.append("- Transformateur fix_mutable_defaults_transform non trouve")
 
     if "add_docstrings_transform" in test_output and "not found" in test_output:
-        problems_detected.append(
-            "PROBLEME: Transformateur add_docstrings_transform non charge"
-        )
-        report_lines.append(
-            "- Transformateur add_docstrings_transform non charge correctement"
-        )
+        problems_detected.append("PROBLEME: Transformateur add_docstrings_transform non charge")
+        report_lines.append("- Transformateur add_docstrings_transform non charge correctement")
 
     # Recommandations
     report_lines.append("\nRECOMMANDATIONS DE CORRECTION:")
 
     if "core\\transformations non trouve" in test_output:
         report_lines.append("1. Verifier que le dossier core/transformations/ existe")
-        report_lines.append(
-            "2. S'assurer qu'il contient les fichiers .py des transformateurs"
-        )
-        report_lines.append(
-            "3. Verifier le fichier __init__.py dans core/transformations/"
-        )
+        report_lines.append("2. S'assurer qu'il contient les fichiers .py des transformateurs")
+        report_lines.append("3. Verifier le fichier __init__.py dans core/transformations/")
 
     if result.failures or result.errors:
         report_lines.append("4. Examiner les erreurs specifiques ci-dessus")
@@ -332,9 +311,7 @@ def main():
             print("Usage:")
             print("  python run_all_tests.py         # Lance tous les tests")
             print("  python run_all_tests.py --list  # Liste les tests")
-            print(
-                "  python run_all_tests.py --run test_file.py  # Lance un test specifique"
-            )
+            print("  python run_all_tests.py --run test_file.py  # Lance un test specifique")
     else:
         # Mode interactif
         while True:
@@ -360,12 +337,8 @@ def main():
                 else:
                     print("\n- Certains tests ont echoue.")
                     print("+ Rapport d'analyse copie vers le presse-papiers")
-                    print(
-                        "+ Collez-le dans une IA avec Ctrl+V pour obtenir des corrections"
-                    )
-                    print(
-                        "+ Le rapport contient les details complets et recommandations"
-                    )
+                    print("+ Collez-le dans une IA avec Ctrl+V pour obtenir des corrections")
+                    print("+ Le rapport contient les details complets et recommandations")
             elif choix == "2":
                 list_available_tests()
             elif choix == "3":

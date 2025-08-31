@@ -129,9 +129,7 @@ def run_suite():
     print_header("SGENERALGUIMANAGER - LANCEUR DE TEST GLOBAL V3.1")
 
     modules_to_test = [
-        p
-        for p in base_path.rglob("*.py")
-        if "__init__" not in p.name and "run_tests" not in p.name
+        p for p in base_path.rglob("*.py") if "__init__" not in p.name and "run_tests" not in p.name
     ]
     all_results = []
 
@@ -174,9 +172,7 @@ def run_suite():
         print(">> Impossible de copier le rapport automatiquement.")
         print("=" * 50)
 
-    report_path = (
-        base_path / "tests" / f"test_results_{datetime.now():%Y%m%d_%H%M%S}.json"
-    )
+    report_path = base_path / "tests" / f"test_results_{datetime.now():%Y%m%d_%H%M%S}.json"
     report_path.parent.mkdir(exist_ok=True)
     with open(report_path, "w", encoding="utf-8") as f:
         json.dump({"summary": summary, "results": all_results}, f, indent=4)

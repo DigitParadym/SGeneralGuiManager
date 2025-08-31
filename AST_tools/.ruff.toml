@@ -1,0 +1,24 @@
+# Ruff configuration file.
+# Automatically generated to fix remaining errors.
+
+# General setting for both the linter and formatter.
+line-length = 100
+
+[lint]
+# Rules to ignore for specific files.
+[lint.per-file-ignores]
+# Ignore F403 for shim files at the root.
+"base_transformer.py" = ["F403"]
+"base_wrapper.py" = ["F403"]
+"ruff_wrapper.py" = ["F403"]
+"pyupgrade_wrapper.py" = ["F403"]
+"transformation_loader.py" = ["F403"]
+"professional_file_filter.py" = ["F403"]
+
+# Ignore E402 for plugins that need to modify sys.path.
+"core/plugins/**/*.py" = ["E402"]
+"scripts/generate_schema.py" = ["E402"]
+
+# The [format] section is for formatter-specific options like quote style.
+# It can be left empty if you are using the defaults.
+[format]

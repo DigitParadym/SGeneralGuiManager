@@ -1,0 +1,43 @@
+{
+  "name": "Plan de Consolidation du Projet AST",
+  "description": "Utilise Ruff pour unifier le style, corriger les erreurs et consolider la qualit\u00e9 du code source.",
+  "version": 2.0,
+  "author": "AST Tools",
+  "transformations": [
+    {
+      "type": "appel_plugin",
+      "plugin_name": "ruff_wrapper",
+      "description": "\u00c9tape 1 : Linting et correction agressive",
+      "params": {
+        "command": "check",
+        "fix": true,
+        "unsafe_fixes": true,
+        "select": [
+          "F",
+          "E",
+          "W",
+          "I",
+          "UP",
+          "B",
+          "SIM",
+          "C4",
+          "RUF"
+        ],
+        "ignore": [
+          "E501"
+        ],
+        "line_length": 100,
+        "statistics": true
+      }
+    },
+    {
+      "type": "appel_plugin",
+      "plugin_name": "ruff_wrapper",
+      "description": "\u00c9tape 2 : Formatage unifi\u00e9 du code",
+      "params": {
+        "command": "format",
+        "line_length": 100
+      }
+    }
+  ]
+}

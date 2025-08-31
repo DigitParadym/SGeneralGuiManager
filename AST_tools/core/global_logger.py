@@ -73,11 +73,7 @@ def log_start(message):
 
     # En-tete de session
     logger.info("=" * 80)
-    logger.info(
-        "DEBUT SESSION AST_TOOLS - {}".format(
-            datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        )
-    )
+    logger.info("DEBUT SESSION AST_TOOLS - {}".format(datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
     logger.info("=" * 80)
     logger.info(message)
     logger.info("-" * 80)
@@ -117,9 +113,7 @@ def log_transformation(transformer_name, file_path, success):
     """Log specialise pour les transformations."""
     logger = _setup_logger()
     status = "SUCCESS" if success else "FAILED"
-    logger.info(
-        f"TRANSFORM [{status}] {transformer_name} -> {os.path.basename(file_path)}"
-    )
+    logger.info(f"TRANSFORM [{status}] {transformer_name} -> {os.path.basename(file_path)}")
 
 
 def log_plugin_load(plugin_name, version, success):
@@ -144,11 +138,7 @@ def log_end(message):
 
     logger.info("-" * 80)
     logger.info(message)
-    logger.info(
-        "FIN SESSION AST_TOOLS - {}".format(
-            datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        )
-    )
+    logger.info("FIN SESSION AST_TOOLS - {}".format(datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
     logger.info("=" * 80)
     logger.info("")  # Ligne vide finale
 
@@ -162,9 +152,7 @@ def get_log_file_path():
 def copy_log_for_debug(destination=None):
     """Copie le log actuel pour debug/partage."""
     if destination is None:
-        destination = "ast_tools_debug_{}.log".format(
-            datetime.now().strftime("%Y%m%d_%H%M%S")
-        )
+        destination = "ast_tools_debug_{}.log".format(datetime.now().strftime("%Y%m%d_%H%M%S"))
 
     log_path = get_log_file_path()
     if os.path.exists(log_path):

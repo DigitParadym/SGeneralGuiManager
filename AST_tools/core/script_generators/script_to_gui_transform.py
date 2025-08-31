@@ -7,7 +7,7 @@ basees sur l analyse de scripts Python existants.
 
 import ast
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 
 class ScriptToGuiTransform:
@@ -119,13 +119,11 @@ class ScriptToGuiTransform:
             elements.append({"type": "Button", "description": "Bouton de validation"})
 
         if has_print:
-            elements.append(
-                {"type": "Text", "description": "Zone d affichage des resultats"}
-            )
+            elements.append({"type": "Text", "description": "Zone d affichage des resultats"})
 
         return elements
 
-    def generate_gui_code(self, analysis: Dict[str, Any], framework: str = None) -> str:
+    def generate_gui_code(self, analysis: Dict[str, Any], framework: Optional[str] = None) -> str:
         """
         Genere le code GUI base sur l analyse.
 
@@ -145,9 +143,7 @@ class ScriptToGuiTransform:
         if framework == "tkinter":
             return self._generate_tkinter_code(analysis)
         else:
-            raise NotImplementedError(
-                f"Generation pour {framework} pas encore implementee"
-            )
+            raise NotImplementedError(f"Generation pour {framework} pas encore implementee")
 
     def _generate_tkinter_code(self, analysis):
         """Genere du code Tkinter simple."""

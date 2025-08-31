@@ -26,7 +26,6 @@ __description__ = "Outils de refactorisation Python par AST"
 __license__ = "MIT"
 
 # Configuration du projet
-import os
 import sys
 from pathlib import Path
 
@@ -59,8 +58,8 @@ try:
     __all__ = [
         "OrchestrateurAST",
         "TransformationLoader",
-        "get_orchestrator",
         "get_loader",
+        "get_orchestrator",
         "list_transformations",
     ]
 

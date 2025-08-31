@@ -81,9 +81,7 @@ class RuffWorker(QThread):
 
         if result["returncode"] == 0:
             if result["stdout"].strip():
-                self.output_received.emit(
-                    f"[SUCCES] Formatage termine:\n{result['stdout']}"
-                )
+                self.output_received.emit(f"[SUCCES] Formatage termine:\n{result['stdout']}")
             else:
                 self.output_received.emit("[SUCCES] Formatage termine avec succes !")
         else:
@@ -121,17 +119,15 @@ class RuffWorker(QThread):
                     "severity_summary": {"error": 0, "warning": 0, "info": 0},
                 }
 
-            self.logger.info(
-                f"Analyse IA terminee: {analysis['total_issues']} problemes"
-            )
+            self.logger.info(f"Analyse IA terminee: {analysis['total_issues']} problemes")
             self.finished_successfully.emit(analysis)
 
         except json.JSONDecodeError as e:
             self.logger.error(f"Erreur JSON: {e}")
-            self.error_occurred.emit(f"Erreur de parsing JSON: {str(e)}")
+            self.error_occurred.emit(f"Erreur de parsing JSON: {e!s}")
         except Exception as e:
             self.logger.error(f"Erreur analyse IA: {e}")
-            self.error_occurred.emit(f"Erreur durant l'analyse IA: {str(e)}")
+            self.error_occurred.emit(f"Erreur durant l'analyse IA: {e!s}")
 
     def _categorize_issues(self, issues):
         """Categorise les problemes par type."""
@@ -196,9 +192,7 @@ class RuffWorker(QThread):
             # Windows: configuration specifique
             if os.name == "nt":
                 common_args["creationflags"] = (
-                    subprocess.CREATE_NO_WINDOW
-                    if hasattr(subprocess, "CREATE_NO_WINDOW")
-                    else 0
+                    subprocess.CREATE_NO_WINDOW if hasattr(subprocess, "CREATE_NO_WINDOW") else 0
                 )
 
             # Verification annulation
@@ -234,14 +228,14 @@ class RuffWorker(QThread):
             self.logger.error(f"Erreur encodage: {e}")
             return {
                 "stdout": "",
-                "stderr": f"Erreur encodage Unicode: {str(e)}",
+                "stderr": f"Erreur encodage Unicode: {e!s}",
                 "returncode": -1,
             }
         except Exception as e:
             self.logger.error(f"Erreur inattendue: {e}")
             return {
                 "stdout": "",
-                "stderr": f"Erreur execution: {str(e)}",
+                "stderr": f"Erreur execution: {e!s}",
                 "returncode": -1,
             }
 

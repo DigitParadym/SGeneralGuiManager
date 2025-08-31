@@ -7,14 +7,15 @@ import os
 import sys
 from typing import List
 
-# Imports Pydantic
-from core.models import TransformationPlanModel
 from pydantic import ValidationError
 
 from core.global_logger import (
     log_success,
     log_warning,
 )
+
+# Imports Pydantic
+from core.models import TransformationPlanModel
 
 # ... (Toute autre detection d'environnement que vous avez) ...
 print("*** Environnement Terminal detecte ***")
@@ -99,9 +100,7 @@ class OrchestrateurAST:
 
     def __init__(self, mode_colab=False):
         self.mode_colab = mode_colab
-        self.analyseur = (
-            AnalyseurCode()
-        )  # Cette ligne a besoin que AnalyseurCode existe
+        self.analyseur = AnalyseurCode()  # Cette ligne a besoin que AnalyseurCode existe
         self.historique = []
 
         self.transformation_loader = None
@@ -121,13 +120,9 @@ class OrchestrateurAST:
             self.transformation_loader = TransformationLoader()
             plugins_info = self.transformation_loader.get_transformation_metadata()
             if plugins_info:
-                log_success(
-                    f"Systeme modulaire actif: {len(plugins_info)} transformation(s)"
-                )
+                log_success(f"Systeme modulaire actif: {len(plugins_info)} transformation(s)")
             else:
-                log_success(
-                    "Systeme modulaire actif (aucune transformation dans core/)"
-                )
+                log_success("Systeme modulaire actif (aucune transformation dans core/)")
         except ImportError:
             log_warning("Systeme modulaire non disponible (dossier core/ manquant)")
         except Exception as e:
@@ -143,7 +138,7 @@ class OrchestrateurAST:
         try:
             with open(chemin_plan_json, encoding="utf-8") as f:
                 donnees_json = json.load(f)
-            
+
             # Validation Pydantic
             plan = TransformationPlanModel(**donnees_json)
 
@@ -159,7 +154,7 @@ class OrchestrateurAST:
             return False
 
         self.log_message(f"Plan '{plan.name}' v{plan.version} valide avec succes.")
-        
+
         if not plan.transformations:
             self.log_message("AVERTISSEMENT: Le plan ne contient aucune instruction.")
             return True
@@ -173,7 +168,7 @@ class OrchestrateurAST:
             self.log_message(
                 f"\n        --- Instruction {i}/{len(plan.transformations)}: {instruction.description} ---"
             )
-            
+
             if instruction.type == "appel_plugin":
                 for fichier in fichiers_cibles:
                     if self.appliquer_transformation_modulaire(
@@ -198,9 +193,7 @@ class OrchestrateurAST:
 
         transformer = self.transformation_loader.get_transformation(transformation_name)
         if not transformer:
-            self.log_message(
-                f"ERREUR: Transformation '{transformation_name}' non trouvee"
-            )
+            self.log_message(f"ERREUR: Transformation '{transformation_name}' non trouvee")
             return False
 
         try:

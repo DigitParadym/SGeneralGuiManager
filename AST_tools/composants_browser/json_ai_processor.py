@@ -29,9 +29,7 @@ class AnalyseurJSONAI:
             if not self.valider_structure(data):
                 return None
 
-            print(
-                f"+ JSON AI charge: {len(data.get('transformations', []))} transformations"
-            )
+            print(f"+ JSON AI charge: {len(data.get('transformations', []))} transformations")
             return data
 
         except json.JSONDecodeError as e:

@@ -12,6 +12,8 @@ import traceback
 from datetime import datetime
 from pathlib import Path
 
+from pydantic import ValidationError
+
 # Imports PySide6
 from PySide6.QtCore import Qt, QThread, Signal
 from PySide6.QtGui import QFont
@@ -42,7 +44,7 @@ from core.global_logger import log_end, log_start
 
 # Imports Pydantic
 from core.models import TransformationPlanModel
-from pydantic import ValidationError
+from professional_file_filter import ProfessionalFileFilter
 
 # Import pour l'integration Ruff
 try:
@@ -71,14 +73,10 @@ class TransformationWorker(QThread):
         try:
             total_files = len(self.target_files)
             if total_files == 0:
-                self.transformation_complete.emit(
-                    False, "Aucun fichier a traiter", self.stats
-                )
+                self.transformation_complete.emit(False, "Aucun fichier a traiter", self.stats)
                 return
 
-            self.log_message.emit(
-                f"Debut des transformations sur {total_files} fichier(s)"
-            )
+            self.log_message.emit(f"Debut des transformations sur {total_files} fichier(s)")
 
             for i, file_path in enumerate(self.target_files):
                 if self.is_cancelled:
@@ -105,19 +103,13 @@ class TransformationWorker(QThread):
                 self.msleep(50)  # Petite pause pour la reactivite de l'UI
 
             if self.is_cancelled:
-                self.transformation_complete.emit(
-                    False, "Transformations annulees", self.stats
-                )
+                self.transformation_complete.emit(False, "Transformations annulees", self.stats)
             else:
-                self.transformation_complete.emit(
-                    True, "Transformations terminees", self.stats
-                )
+                self.transformation_complete.emit(True, "Transformations terminees", self.stats)
 
         except Exception as e:
             self.log_message.emit(f"ERREUR CRITIQUE dans le worker: {e}")
-            self.transformation_complete.emit(
-                False, f"Erreur critique: {e}", self.stats
-            )
+            self.transformation_complete.emit(False, f"Erreur critique: {e}", self.stats)
 
     def cancel(self):
         self.is_cancelled = True
@@ -129,6 +121,7 @@ class ASTMainWindow(QMainWindow):
 
     def __init__(self):
         super().__init__()
+        self.file_filter = ProfessionalFileFilter()  # FILTRE
         self.orchestrateur = None
         self.target_files = []
         self.current_plan = None
@@ -352,30 +345,30 @@ class ASTMainWindow(QMainWindow):
         try:
             with open(plan_path, encoding="utf-8") as f:
                 plan_data = json.load(f)
-            
+
             # Validation Pydantic
             plan_model = TransformationPlanModel(**plan_data)
-            
+
             self.current_plan = plan_model
             info_text = f"Nom: {plan_model.name}\n"
             info_text += f"Description: {plan_model.description}\n"
             info_text += f"Version: {plan_model.version}\n"
-            if hasattr(plan_model, 'author') and plan_model.author:
+            if hasattr(plan_model, "author") and plan_model.author:
                 info_text += f"Auteur: {plan_model.author}\n"
             info_text += f"Transformations: {len(plan_model.transformations)}"
-            
+
             self.plan_info.setText(info_text)
             self.update_execute_button()
             self.log_message(f"Plan valide et charge: {os.path.basename(plan_path)}")
 
         except ValidationError as e:
             self.current_plan = None
-            error_message = f"ERREUR: Plan JSON invalide.\n\n"
+            error_message = "ERREUR: Plan JSON invalide.\n\n"
             # Formatter les erreurs Pydantic de maniere lisible
             for error in e.errors():
                 field = " -> ".join(str(x) for x in error["loc"])
                 error_message += f"- {field}: {error['msg']}\n"
-            
+
             self.plan_info.setText(error_message)
             QMessageBox.warning(self, "Plan Invalide", error_message)
             self.log_message(f"Echec de chargement du plan invalide: {os.path.basename(plan_path)}")
@@ -383,7 +376,7 @@ class ASTMainWindow(QMainWindow):
             self.current_plan = None
             self.plan_info.setText(f"ERREUR de lecture: {e}")
             self.log_message(f"Erreur chargement plan: {e}")
-        
+
         self.update_execute_button()
 
     def add_target_files(self):
@@ -394,23 +387,25 @@ class ASTMainWindow(QMainWindow):
             for file_path in files:
                 if file_path not in self.target_files:
                     self.target_files.append(file_path)
-                    self.files_list.addItem(
-                        QListWidgetItem(os.path.basename(file_path))
-                    )
+                    self.files_list.addItem(QListWidgetItem(os.path.basename(file_path)))
             self.update_execute_button()
             self.log_message(f"{len(files)} fichier(s) ajoute(s)")
 
     def add_target_folder(self):
         folder_path = QFileDialog.getExistingDirectory(self, "Selectionner dossier")
         if folder_path:
-            py_files = [str(p) for p in Path(folder_path).rglob("*.py")]
+            # NOUVEAU: Utiliser le filtre
+            if hasattr(self, "file_filter"):
+                all_project_files = self.file_filter.get_project_files()
+                py_files = [str(f) for f in all_project_files]
+                self.log_message(f"Chargement avec filtre: {len(py_files)} fichiers")
+            else:
+                py_files = [str(p) for p in Path(folder_path).rglob("*.py")]
             added = 0
             for file_path in py_files:
                 if file_path not in self.target_files:
                     self.target_files.append(file_path)
-                    self.files_list.addItem(
-                        QListWidgetItem(os.path.basename(file_path))
-                    )
+                    self.files_list.addItem(QListWidgetItem(os.path.basename(file_path)))
                     added += 1
             self.update_execute_button()
             self.log_message(f"{added} fichier(s) ajoute(s) du dossier.")
@@ -465,7 +460,9 @@ class ASTMainWindow(QMainWindow):
 
     def on_transformations_complete(self, success, message, stats):
         self.show_progress_interface(False)
-        report = f"{message}\n\nSucces: {stats['files_successful']}, Echecs: {stats['files_failed']}"
+        report = (
+            f"{message}\n\nSucces: {stats['files_successful']}, Echecs: {stats['files_failed']}"
+        )
         QMessageBox.information(self, "Termine", report)
         self.log_message("=== RAPPORT FINAL ===")
         self.log_message(report)
@@ -475,11 +472,7 @@ class ASTMainWindow(QMainWindow):
             # Trouver le chemin complet a partir du nom de base
             filename = current_item.text()
             full_path = next(
-                (
-                    path
-                    for path in self.target_files
-                    if os.path.basename(path) == filename
-                ),
+                (path for path in self.target_files if os.path.basename(path) == filename),
                 None,
             )
             if full_path:

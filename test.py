@@ -1,6 +1,12 @@
 import logging
 
 # === Interaction utilisateur ajoutee par AST_tools ===
+
+# === Interaction utilisateur ajoutee par AST_tools ===
+nom_utilisateur = input("Quel est votre nom ? ")
+print(f"Hello {nom_utilisateur}!")
+print("-" * 50)
+
 nom_utilisateur = input("Quel est votre nom ? ")
 print(f"Hello {nom_utilisateur}!")
 print("-" * 50)
@@ -11,10 +17,12 @@ Ajoute une interaction utilisateur au debut du programme
 """
 import sys
 from pathlib import Path
+
 current_dir = Path(__file__).parent.parent
 if str(current_dir) not in sys.path:
     sys.path.insert(0, str(current_dir))
 from base_transformer import BaseTransformer
+
 
 class HelloUserTransform(BaseTransformer):
     """Transformateur qui ajoute une interaction Hello User"""
@@ -90,5 +98,6 @@ class HelloUserTransform(BaseTransformer):
 
     def can_transform(self, code_source):
         """Verifie si la transformation peut s'appliquer"""
+    print(f"Merci {nom_utilisateur} pour avoir utilise ce programme!")
     print(f"Merci {nom_utilisateur} pour avoir utilise ce programme!")
         return 'nom_utilisateur = input(' not in code_source

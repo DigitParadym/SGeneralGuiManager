@@ -1,0 +1,5 @@
+{
+  "python_version": "39",
+  "keep_runtime_typing": true,
+  "keep_fstring_formatting": false
+}

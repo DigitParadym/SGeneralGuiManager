@@ -1,0 +1,17 @@
+{
+  "name": "Creation nouveau module",
+  "description": "Genere un nouveau module Python",
+  "version": 1.0,
+  "author": "AST Tools",
+  "transformations": [
+    {
+      "type": "generator",
+      "description": "Creation d'un nouveau service",
+      "plugin_name": "module_generator",
+      "params": {
+        "type": "service",
+        "name": "data_processor"
+      }
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+    "name": "Plan de modernisation",
+    "description": "Teste les wrappers avec parametres",
+    "version": 1.0,
+    "transformations": [
+        {
+            "type": "appel_plugin",
+            "plugin_name": "pyupgrade_wrapper",
+            "description": "Modernise vers Python 3.8+",
+            "params": {
+                "py38-plus": true
+            }
+        },
+        {
+            "type": "appel_plugin",
+            "plugin_name": "ruff_wrapper",
+            "description": "Formate le code",
+            "params": {
+                "command": "format",
+                "line-length": 100
+            }
+        }
+    ]
+}

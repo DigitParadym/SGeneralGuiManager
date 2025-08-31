@@ -21,11 +21,11 @@ __description__ = "Système modulaire de transformations AST pour Python"
 
 # Imports principaux disponibles depuis le module core
 try:
-    from .base_transformer import BaseTransformer
+    from .plugins.base.base_transformer import BaseTransformer
     from .transformation_loader import TransformationLoader
 
     # Exports publics
-    __all__ = ["TransformationLoader", "BaseTransformer"]
+    __all__ = ["BaseTransformer", "TransformationLoader"]
 
 except ImportError as e:
     # En cas d'erreur d'import, on continue sans crash

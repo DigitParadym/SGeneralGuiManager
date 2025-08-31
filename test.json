@@ -1,32 +1,12 @@
 {
-  "name": "Transformation complete",
-  "description": "Applique plusieurs transformations en sequence",
+  "name": "Ruff Simple",
+  "description": "Formatage avec Ruff",
   "version": 1.0,
-  "author": "AST Tools",
   "transformations": [
     {
       "type": "appel_plugin",
-      "description": "Suppression imports inutiles",
-      "plugin_name": "unused_import_remover",
-      "params": {}
-    },
-    {
-      "type": "appel_plugin",
-      "description": "Ajout des docstrings",
-      "plugin_name": "add_docstrings_transform",
-      "params": {}
-    },
-    {
-      "type": "appel_plugin",
-      "description": "Conversion print vers logging",
-      "plugin_name": "print_to_logging_transform",
-      "params": {}
-    },
-    {
-      "type": "appel_plugin",
-      "description": "Ajout interaction utilisateur",
-      "plugin_name": "hello_user_transform",
-      "params": {}
+      "description": "Ruff fix",
+      "plugin_name": "ruff_wrapper"
     }
   ]
 }

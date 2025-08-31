@@ -1,196 +1,137 @@
 #!/usr/bin/env python3
 """
-Correction de models.py pour declarer hello_user_transform
+A powerful and safe script to clean up unnecessary files and folders
+from the AST_tools project directory.
 """
-
+import os
+import shutil
+import argparse
 from pathlib import Path
-import re
 
+# --- Configuration: Define what is considered "unnecessary" ---
 
-def fix_models_py(base_path):
-    """Corrige models.py pour inclure hello_user_transform."""
-    print("=" * 60)
-    print("CORRECTION DE MODELS.PY")
-    print("=" * 60)
-    
-    models_file = base_path / "core" / "models.py"
-    
-    if not models_file.exists():
-        print("  [ERREUR] models.py non trouve")
-        return False
-    
-    content = models_file.read_text(encoding='utf-8')
-    
-    # Chercher et corriger AVAILABLE_ARTISANS
-    new_content = re.sub(
-        r'AVAILABLE_ARTISANS = \{([^}]+)\}',
-        lambda m: 'AVAILABLE_ARTISANS = {\n' + 
-                  '    "add_docstrings_transform",\n' +
-                  '    "pathlib_transformer_optimized",\n' +
-                  '    "print_to_logging_transform",\n' +
-                  '    "unused_import_remover",\n' +
-                  '    "hello_user_transform"\n' +
-                  '}',
-        content,
-        flags=re.DOTALL
-    )
-    
-    # Si pas trouve, essayer un autre pattern
-    if new_content == content:
-        # Chercher juste la ligne AVAILABLE_ARTISANS
-        lines = content.split('\n')
-        new_lines = []
-        in_artisans = False
-        fixed = False
-        
-        for line in lines:
-            if 'AVAILABLE_ARTISANS' in line and '{' in line:
-                in_artisans = True
-                new_lines.append(line)
-            elif in_artisans and '}' in line and not fixed:
-                # Ajouter hello_user_transform avant la fermeture
-                if '"hello_user_transform"' not in content:
-                    new_lines.append('    "hello_user_transform",')
-                new_lines.append(line)
-                in_artisans = False
-                fixed = True
-            else:
-                new_lines.append(line)
-        
-        new_content = '\n'.join(new_lines)
-    
-    # Verifier que AVAILABLE_PLUGINS est mis a jour aussi
-    if 'AVAILABLE_PLUGINS = AVAILABLE_WRAPPERS | AVAILABLE_ARTISANS' not in new_content:
-        # Chercher AVAILABLE_PLUGINS et le corriger
-        new_content = re.sub(
-            r'AVAILABLE_PLUGINS = \{[^}]+\}',
-            'AVAILABLE_PLUGINS = AVAILABLE_WRAPPERS | AVAILABLE_ARTISANS',
-            new_content,
-            flags=re.DOTALL
-        )
-    
-    # Ecrire le fichier
-    models_file.write_text(new_content, encoding='utf-8')
-    
-    # Verifier le resultat
-    if 'hello_user_transform' in new_content:
-        print("  [OK] hello_user_transform ajoute dans AVAILABLE_ARTISANS")
-    else:
-        print("  [ERREUR] Echec de l'ajout")
-        return False
-    
-    return True
+# Cache directories to be completely removed.
+CACHE_DIRS = [
+    "__pycache__",
+    ".pytest_cache",
+    ".ruff_cache",
+]
 
+# File patterns and suffixes for backup/temporary files.
+FILE_PATTERNS_TO_DELETE = [
+    "*.bak",
+    "*.bak_*",  # <-- ADDED: Catches timestamped backups like .bak_20250829
+    "*.backup",
+    "*_backup_*.py",
+    "*_old.py",
+]
 
-def verify_models(base_path):
-    """Verifie le contenu de models.py."""
-    print("\n" + "=" * 60)
-    print("VERIFICATION DE MODELS.PY")
-    print("=" * 60)
-    
-    models_file = base_path / "core" / "models.py"
-    content = models_file.read_text(encoding='utf-8')
-    
-    # Extraire AVAILABLE_ARTISANS
-    match = re.search(r'AVAILABLE_ARTISANS = \{([^}]+)\}', content, re.DOTALL)
-    
-    if match:
-        artisans = match.group(1)
-        print("  AVAILABLE_ARTISANS contient:")
-        for line in artisans.split('\n'):
-            if line.strip() and not line.strip().startswith('#'):
-                print(f"    {line.strip()}")
-        
-        if 'hello_user_transform' in artisans:
-            print("\n  [OK] hello_user_transform est bien declare")
-        else:
-            print("\n  [ERREUR] hello_user_transform manquant")
-    else:
-        print("  [ERREUR] AVAILABLE_ARTISANS non trouve")
-    
-    return True
+# Specific files to delete.
+SPECIFIC_FILES_TO_DELETE = [
+    "ast_tools.log",
+    "ast_tools_previous.log",
+    "errors.log",
+    "project_files.txt",
+]
 
+# Shim files at the root to be deleted (they can be regenerated).
+SHIM_FILES_AT_ROOT = [
+    "base_transformer.py",
+    "base_wrapper.py",
+    "professional_file_filter.py",
+    "pyupgrade_wrapper.py",
+    "ruff_wrapper.py",
+    "transformation_loader.py",
+]
 
-def test_validation(base_path):
-    """Teste la validation du plan."""
-    print("\n" + "=" * 60)
-    print("TEST DE VALIDATION")
-    print("=" * 60)
-    
-    import subprocess
-    import sys
-    
-    test_code = '''
-import sys
-from pathlib import Path
-sys.path.insert(0, str(Path(__file__).parent))
+def find_items_to_clean(root_path: Path):
+    """Finds all files and directories matching the cleanup criteria."""
+    items_to_delete = []
 
-from core.models import AVAILABLE_PLUGINS, AVAILABLE_ARTISANS
+    # Find all matching items recursively
+    for item in root_path.rglob("*"):
+        # 1. Check for cache directories
+        if item.is_dir() and item.name in CACHE_DIRS:
+            items_to_delete.append(item)
+            continue
 
-print(f"  Artisans disponibles: {len(AVAILABLE_ARTISANS)}")
-for artisan in sorted(AVAILABLE_ARTISANS):
-    print(f"    - {artisan}")
+        # 2. Check for file patterns
+        if item.is_file():
+            for pattern in FILE_PATTERNS_TO_DELETE:
+                if item.match(pattern):
+                    items_to_delete.append(item)
+                    break  # Move to next item once matched
+    
+    # 3. Check for specific files anywhere in the project
+    for file_name in SPECIFIC_FILES_TO_DELETE:
+        items_to_delete.extend(root_path.rglob(file_name))
 
-if "hello_user_transform" in AVAILABLE_ARTISANS:
-    print("\\n  [OK] hello_user_transform est dans AVAILABLE_ARTISANS")
-else:
-    print("\\n  [ERREUR] hello_user_transform non trouve dans AVAILABLE_ARTISANS")
+    # 4. Check for shim files only at the project root
+    for file_name in SHIM_FILES_AT_ROOT:
+        item = root_path / file_name
+        if item.exists() and item.is_file():
+            items_to_delete.append(item)
 
-print(f"\\n  Total plugins: {len(AVAILABLE_PLUGINS)}")
-'''
-    
-    test_file = base_path / "test_models.py"
-    test_file.write_text(test_code)
-    
-    result = subprocess.run(
-        [sys.executable, str(test_file)],
-        capture_output=True,
-        text=True,
-        cwd=str(base_path)
-    )
-    
-    print(result.stdout)
-    if result.stderr:
-        print("Erreurs:", result.stderr)
-    
-    test_file.unlink()
-    
-    return "[OK]" in result.stdout
-
+    # Return a unique, sorted list
+    return sorted(list(set(items_to_delete)))
 
 def main():
-    """Fonction principale."""
-    print("\n" + "=" * 60)
-    print("CORRECTION MODELS.PY POUR HELLO_USER_TRANSFORM")
-    print("=" * 60)
-    
-    base_path = Path.cwd()
-    
-    if not (base_path / "core").exists():
-        print("ERREUR: Execute depuis la racine du projet")
-        return 1
-    
-    print(f"Repertoire: {base_path}")
-    
-    # Corriger models.py
-    if not fix_models_py(base_path):
-        return 1
-    
-    # Verifier
-    verify_models(base_path)
-    
-    # Tester
-    if not test_validation(base_path):
-        print("\nERREUR: Validation echouee")
-        return 1
-    
-    print("\n" + "=" * 60)
-    print("CORRECTION TERMINEE")
-    print("=" * 60)
-    print("\nLe plan JSON devrait maintenant fonctionner")
-    
-    return 0
+    """Main execution function."""
+    parser = argparse.ArgumentParser(
+        description="Clean unnecessary files from the project directory."
+    )
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument(
+        "--show",
+        action="store_true",
+        help="Show which files and folders would be deleted (dry run)."
+    )
+    group.add_argument(
+        "--apply",
+        action="store_true",
+        help="Permanently delete the unnecessary files and folders."
+    )
+    args = parser.parse_args()
 
+    project_root = Path('.').resolve()
+    items_to_delete = find_items_to_clean(project_root)
+
+    if not items_to_delete:
+        print("[OK] Project is already clean. Nothing to do.")
+        return
+
+    print("=" * 60)
+    if args.show:
+        print(f"DRY RUN: The following {len(items_to_delete)} items would be deleted:")
+    else:
+        print(f"The following {len(items_to_delete)} items will be PERMANENTLY DELETED:")
+    print("=" * 60)
+    
+    for item in items_to_delete:
+        item_type = "DIR " if item.is_dir() else "FILE"
+        print(f"  [{item_type}] {item.relative_to(project_root)}")
+    
+    print("=" * 60)
+
+    if args.apply:
+        confirm = input("Are you sure you want to continue? (yes/no): ").lower()
+        if confirm == 'yes':
+            print("\nApplying cleanup...")
+            deleted_count = 0
+            for item in items_to_delete:
+                try:
+                    if item.is_dir():
+                        shutil.rmtree(item)
+                        print(f"  [DELETED DIR] {item.relative_to(project_root)}")
+                    elif item.is_file():
+                        item.unlink()
+                        print(f"  [DELETED FILE] {item.relative_to(project_root)}")
+                    deleted_count += 1
+                except Exception as e:
+                    print(f"  [ERROR] Could not delete {item}: {e}")
+            print(f"\n[SUCCESS] Cleanup complete. {deleted_count} items were deleted.")
+        else:
+            print("\nCleanup cancelled.")
 
 if __name__ == "__main__":
-    exit(main())
+    main()
